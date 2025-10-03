@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>D.R. Horton — Gift Builder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --drh-navy:#182757; }
+    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <div id="root"></div>
+
+  <!-- React (UMD) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <script>
+  // ================= CONFIG =================
+  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyMRTpMiGD_d56NPpoXxlwZdwXaLpcOAtUq_kGC7zNH2kljgDp_PfX7tEC2TrGXc3Z70g/exec";
+  const ADMIN_EMAIL  = "roselleralegre2019@gmail.com";
+  const SITE_NAME    = "D.R. Horton — Welcome Gift";
+  // ==========================================
+
+  const { useMemo, useState, useEffect } = React;
+
+  // ---------- Catalog ----------
+  // base = price per unit at item's MOQ. moq = item MOQ (used to gate order qty).
+  // Place images in /img with these IDs as filenames: img/<id>.webp (PNG fallback).
+  const CATALOG = [
+    { id:"cutting_board_two_tone",      name:'11" Two-Tone Cutting Board',                          base:8.67,  moq:48,  img:"notebook" },
+    { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20,  img:"box"      },
+    { id:"tumbler_oasis_20oz",          name:'Oasis-II 20 oz Stainless Tumbler',                    base:9.60,  moq:36,  img:"mug"      },
+    { id:"vacuum_dynamo_portable",      name:'Dynamo Rechargeable Portable Vacuum',                 base:10.70, moq:40,  img:"towel"    },
+    { id:"trunk_organizer_expandable",  name:'Expandable Trunk Organizer',                          base:11.45, moq:50,  img:"box"      },
+    { id:"box_corrugated_large_black",  name:'Black Corrugated Large Box',                          base:11.81, moq:100, img:"box"      },
+    { id:"screwdriver_artisan_20pc",    name:'Best Buddy Tools® Artisan Screwdriver Set (20-pc)',   base:12.25, moq:30,  img:"pen"      },
+    { id:"cooler_lunch_ultimate",       name:'Ultimate Lunch Bag Cooler',                           base:12.49, moq:100, img:"towel"    },
+    { id:"camp_mug_14oz",               name:'14 oz Powder-Coated Camping Mug',                     base:15.95, moq:48,  img:"mug"      },
+    { id:"car_wash_pit_crew",           name:'Pit Crew 9-Piece Car Wash Detailing Kit',             base:16.67, moq:25,  img:"towel"    },
+    { id:"usb_diffuser_magnet_case",    name:'USB Diffuser (clear case, magnet closure)',           base:17.02, moq:25,  img:"mug"      },
+    { id:"tool_kit_26pc",               name:'26-Piece Deluxe Tool Kit',                            base:17.64, moq:40,  img:"pen"      },
+    { id:"utensil_set_bamboo_silicone", name:'5-Piece Bamboo & Silicone Utensil Set',               base:18.95, moq:50,  img:"notebook" },
+    { id:"finch_jar_wood_lid",          name:'Finch Jar with Wooden Lid',                           base:19.95, moq:72,  img:"mug"      },
+    { id:"cooler_backpack_mod",         name:'Mod Insulated Cooler Backpack',                       base:20.29, moq:50,  img:"towel"    },
+    { id:"candle_wixie_5oz",            name:'Wixie 5 oz Candle (with gift box)',                   base:20.63, moq:50,  img:"mug"      },
+    { id:"tool_set_alton_22pc",         name:'Alton 22-Piece Tool Set',                             base:20.99, moq:25,  img:"pen"      },
+    { id:"knife_peeler_ceramic_set",    name:'Top Choice Ceramic Knife & Peeler Set',               base:21.10, moq:20,  img:"notebook" },
+    { id:"wine_tools_bamboo_4pc",       name:'4-Piece Bamboo Wine Tool Set',                        base:21.49, moq:50,  img:"notebook" },
+    { id:"tumbler_pinnacle_40oz",       name:'Pinnacle 40 oz Vacuum Insulated Tumbler w/ Straw',    base:21.53, moq:24,  img:"mug"      },
+    { id:"chefs_companion_kit",         name:"Chef's Companion Kit",                                base:21.69, moq:50,  img:"notebook" },
+    { id:"humidifier_aroma_lightup",    name:'Aroma Light-Up Humidifier',                           base:21.99, moq:50,  img:"mug"      },
+    { id:"easy_kitchen_apple_master",   name:'Easy Kitchen Gift Set – The Apple Master',            base:21.99, moq:25,  img:"notebook" },
+    { id:"hypergear_multi_plug_5",      name:'HyperGear Multi Plug 5 (USB-C + USB)',                base:22.99, moq:24,  img:"pen"      },
+    { id:"indoor_pillow_16",            name:'Indoor Pillow 16"×16"',                               base:23.47, moq:48,  img:"towel"    },
+    { id:"plush_blanket_50x60",         name:'Micro Fleece Plush Blanket 50"×60"',                  base:24.38, moq:25,  img:"towel"    },
+    { id:"cube_power_strip",            name:'HyperGear CUBE Multi-Port Power Strip (cord)',        base:26.99, moq:24,  img:"pen"      },
+    { id:"rabbit_garnish_tool",         name:'rabbit® Cocktail Garnish Tool',                       base:27.50, moq:48,  img:"pen"      },
+    { id:"bbq_grilling_mitt_kit",       name:'BBQ Grilling Mitt Kit (with tools)',                  base:28.33, moq:25,  img:"notebook" },
+    { id:"lex_bamboo_speaker_charger",  name:'Lex Bamboo Speaker + 5W Phone Charger',               base:29.25, moq:50,  img:"pen"      },
+    { id:"ilive_magnetic_speaker",      name:'iLive™ Water-Resistant Magnetic Speaker',             base:32.40, moq:20,  img:"pen"      },
+    { id:"satechi_findall_keychain",    name:'SATECHI® FindAll™ Keychain (Apple Find My)',          base:33.75, moq:1,   img:"pen"      },
+    { id:"friz_cooler_bag",             name:'Heavy-Duty Friz Cooler Bag',                          base:36.30, moq:48,  img:"towel"    },
+    { id:"crossroad_emergency_kit",     name:'Crossroad Emergency Road Kit',                        base:36.72, moq:10,  img:"pen"      },
+    { id:"growler_64oz_beast",          name:'64 oz “The Beast” Stainless Growler',                 base:36.85, moq:24,  img:"mug"      },
+    { id:"desk_lamp_linear_black",      name:'Modern Office Desk Lamp (Linear)',                    base:36.98, moq:12,  img:"pen"      },
+    { id:"urban_peak_cooler_12can",     name:'Urban Peak Waterproof 12-Can Hinge Cooler',           base:37.59, moq:12,  img:"towel"    },
+    { id:"sound_shine_lamp_bt",         name:'Sound Shine Desk Lamp + Bluetooth Speaker + Qi',      base:37.78, moq:15,  img:"pen"      },
+    { id:"myrnam_cooler_backpack",      name:'Myrnam Cooler Backpack',                              base:37.95, moq:35,  img:"towel"    },
+    { id:"riverbend_cooler_chair",      name:'Riverbend Foldable Cooler Backpack & Chair',          base:38.99, moq:12,  img:"towel"    },
+    { id:"mini_maglite_2aa",            name:'Mini Maglite® 2 “AA” Flashlight',                     base:26.58, moq:36,  img:"pen"      },
+    { id:"power_pulse_handheld_vac",    name:'Power Pulse Rechargeable Handheld Vacuum',            base:36.29, moq:25,  img:"towel"    },
+    { id:"chess_board_wine_set",        name:'Chess Board & Wine Tool Set',                         base:20.00, moq:36,  img:"notebook" },
+    { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12,  img:"pen"      },
+  ];
+
+  // Recommended sets (auto-pick tier by number of items)
+  const RECOMMENDED_SETS = [
+    { id:'good',   label:'Good',   items:['tumbler_oasis_20oz','cutting_board_two_tone','utensil_set_bamboo_silicone'] },
+    { id:'better', label:'Better', items:['tumbler_pinnacle_40oz','plush_blanket_50x60','wine_tools_bamboo_4pc','finch_jar_wood_lid'] },
+    { id:'best',   label:'Best',   items:['myrnam_cooler_backpack','satechi_findall_keychain','hypergear_multi_plug_5','lex_bamboo_speaker_charger','growler_64oz_beast'] },
+  ];
+
+  const BOX_TIERS = [
+    { id:"starter",  name:"Starter Kit",  slots:3, pack:4.00 },
+    { id:"standard", name:"Standard Kit", slots:4, pack:6.00 },
+    { id:"premium",  name:"Premium Kit",  slots:5, pack:9.00 },
+  ];
+
+  // ---------- Visual helpers ----------
+  function Icon({kind, className}) {
+    const c = className || 'w-14 h-14 text-slate-400';
+    if(kind==='mug')      return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('rect',{x:28,y:28,width:56,height:64,rx:8,fill:'currentColor'}),React.createElement('rect',{x:84,y:40,width:16,height:28,rx:6,fill:'currentColor'}));
+    if(kind==='pen')      return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('path',{d:'M20 100l16 8 64-64-16-8z',fill:'currentColor'}),React.createElement('rect',{x:86,y:26,width:16,height:16,fill:'currentColor'}));
+    if(kind==='towel')    return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('path',{d:'M32 24h56v80H32z',fill:'currentColor'}),React.createElement('path',{d:'M32 44h56',stroke:'currentColor','strokeWidth':6}));
+    if(kind==='notebook') return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('rect',{x:30,y:18,width:56,height:92,rx:6,fill:'currentColor'}),React.createElement('rect',{x:38,y:30,width:32,height:6,fill:'currentColor'}));
+    if(kind==='box')      return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('path',{d:'M16 40l48-16 48 16-48 16z',fill:'currentColor'}),React.createElement('path',{d:'M24 44v44l40 16V60zM104 44v44L64 104V60z',fill:'currentColor'}));
+    return React.createElement('div',{className:'w-14 h-14 rounded-lg bg-slate-300'});
+  }
+
+  // Use /img/<id>.webp with PNG fallback
+  function ProductImage({ id, alt, className }) {
+    const webp = `img/${id}.webp`;
+    const png  = `img/${id}.png`;
+    return React.createElement('img', {
+      alt, src: webp,
+      className: className || 'w-full h-full object-contain select-none pointer-events-none',
+      draggable: false,
+      onError: (e) => { e.currentTarget.onerror = null; e.currentTarget.src = png; }
+    });
+  }
+
+  // ---------- App ----------
+  function App(){
+    const [tier,setTier]         = useState(BOX_TIERS[1]);    // default: Standard
+    const [selected,setSelected] = useState([]);              // item ids in pick order
+    const [qty,setQty]           = useState(25);
+    const [brand]                = useState('D.R. Horton');
+    const [email,setEmail]       = useState('');
+    const [sending,setSending]   = useState(false);
+    const [error,setError]       = useState('');
+
+    // Enforce order quantity >= largest item MOQ selected
+    const requiredQty = useMemo(
+      () => Math.max(1, ...selected.map(id => (CATALOG.find(i=>i.id===id)?.moq || 1))),
+      [selected]
+    );
+    useEffect(() => { if (qty < requiredQty) setQty(requiredQty); }, [requiredQty]);
+
+    const remaining = tier.slots - selected.length;
+
+    // Price per kit = sum(selected base prices) + pack
+    const priceEach = useMemo(()=>{
+      const items = selected.map(id => CATALOG.find(i=>i.id===id));
+      const itemSum = items.reduce((s,i)=>s+(i?.base||0),0);
+      return (itemSum + tier.pack).toFixed(2);
+    },[selected,tier]);
+
+    const total = useMemo(()=> (qty * parseFloat(priceEach||0)).toFixed(2), [qty, priceEach]);
+
+    // Item toggling preserves order; no more than slots
+    function toggle(id){
+      setSelected(prev =>
+        prev.includes(id)
+          ? prev.filter(x => x !== id)
+          : (prev.length < tier.slots ? [...prev, id] : prev)
+      );
+    }
+
+    // Selecting a TIER clears selections (per your request)
+    function onTierClick(b){
+      setTier(b);
+      setSelected([]);         // zero selected
+    }
+
+    // Selecting a RECOMMENDED SET: auto set tier & items
+    function chooseSet(set) {
+      const items = set.items.slice(0, 5);       // safety
+      const t = BOX_TIERS.find(x => x.slots === items.length) || tier;
+      setTier(t);
+      setSelected(items);
+    }
+
+    function SetCard({set}) {
+      const first = CATALOG.find(i => i.id === set.items[0]);
+      const active = selected.length === set.items.length &&
+                     set.items.every(id => selected.includes(id));
+      return React.createElement('button', {
+        onClick: () => chooseSet(set),
+        className:
+          `rounded-2xl border p-4 text-left transition bg-white
+           ${active ? 'border-[var(--drh-navy)] ring-1 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow'}`
+      },
+        React.createElement('div', { className:'flex items-center gap-3' },
+          React.createElement('div', { className:'h-12 w-12 rounded-xl bg-slate-100 grid place-items-center overflow-hidden' },
+            first
+              ? React.createElement(ProductImage, { id:first.id, alt:first.name, className:'w-12 h-12 object-contain' })
+              : React.createElement(Icon, { kind:'box', className:'w-12 h-12 text-slate-400' })
+          ),
+          React.createElement('div', { className:'min-w-0' },
+            React.createElement('div', { className:'font-medium' }, set.label),
+            React.createElement('div', { className:'text-xs text-slate-500' }, `${set.items.length} items`)
+          )
+        )
+      );
+    }
+
+    // Preview grid columns: 4 -> 2 cols; 3 or 5 -> 3 cols
+    const previewColsClass = tier.slots === 4 ? 'grid-cols-2' : 'grid-cols-3';
+
+    async function submit(){
+      setError('');
+      if(!email){ setError('Please enter a contact email.'); return; }
+      setSending(true);
+
+      const payload = {
+        admin: ADMIN_EMAIL,
+        site: SITE_NAME,
+        email,
+        brand,
+        tier: { id:tier.id, name:tier.name, slots:tier.slots, pack:tier.pack },
+        qty,
+        priceEach,
+        total,
+        items: selected.map(id => {
+          const i = CATALOG.find(x=>x.id===id)||{};
+          return { id, name:i.name || id, moq:i.moq || 1, unitPrice:i.base };
+        }),
+      };
+
+      try{
+        const res = await fetch(ENDPOINT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' }, // avoid preflight
+          body: JSON.stringify(payload),
+        });
+        const txt = await res.text();
+        if(!res.ok) throw new Error('Server '+res.status+': '+txt);
+        window.location.href = '..thankyou/';
+      }catch(err){
+        console.error(err);
+        setError('Submit failed. '+String(err).slice(0,300));
+      }finally{
+        setSending(false);
+      }
+    }
+
+    // ---------- UI ----------
+    return React.createElement('div', null,
+      // Header bar
+      React.createElement('header',{className:'sticky top-0 z-30 bg-[var(--drh-navy)] text-white'},
+        React.createElement('div',{className:'max-w-6xl mx-auto px-4 py-4 flex items-center justify-between'},
+          React.createElement('div',{className:'font-semibold'},'D.R. Horton — Gift Builder'),
+          React.createElement('div',{className:'flex items-center gap-6 text-sm'},
+            React.createElement('div',null,
+              React.createElement('div',{className:'text-white/80'},'Estimate / ea'),
+              React.createElement('div',{className:'text-lg font-semibold'},'$'+priceEach)
+            ),
+            React.createElement('div',null,
+              React.createElement('div',{className:'text-white/80'},'Order Qty'),
+              React.createElement('div',{className:'text-lg font-semibold'},qty)
+            )
+          )
+        )
+      ),
+
+      // Main grid
+      React.createElement('main',{className:'max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-5 gap-6'},
+
+        // Recommended sets (no scrolling; 3-up)
+        React.createElement('div',{className:'lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'},
+          RECOMMENDED_SETS.map(s => React.createElement(SetCard,{key:s.id,set:s}))
+        ),
+
+        // Left column: Select Kit + Select Items
+        React.createElement('section',{className:'lg:col-span-3 space-y-6'},
+
+          // 1) Select Kit
+          React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
+            React.createElement('div',{className:'flex items-start justify-between'},
+              React.createElement('div',null,
+                React.createElement('h2',{className:'text-lg font-semibold'},'1) Select Kit'),
+                React.createElement('p',{className:'text-sm text-slate-500'},'Pick a tier, choose items, and set your quantity.')
+              ),
+              React.createElement('button',{onClick:()=>{setTier(BOX_TIERS[1]); setSelected([]);},className:'text-sm px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50'},'Reset')
+            ),
+            React.createElement('div',{className:'mt-4 grid md:grid-cols-3 gap-3'},
+              BOX_TIERS.map(b => React.createElement('button',{
+                  key:b.id,
+                  onClick:()=>onTierClick(b),
+                  className:`relative rounded-2xl border p-4 text-left transition hover:shadow ${tier.id===b.id?'border-[var(--drh-navy)] ring-1 ring-[var(--drh-navy)]':'border-slate-200'}`
+                },
+                React.createElement('div',{className:'h-8 w-8 rounded-xl bg-[var(--drh-navy)] grid place-items-center text-white mb-2'},'📦'),
+                React.createElement('div',{className:'font-medium'},b.name),
+                React.createElement('div',{className:'text-xs text-slate-500'},`Up to ${b.slots} items • Packing $${b.pack.toFixed(2)}`),
+                tier.id===b.id && React.createElement('span',{className:'absolute top-3 right-3 text-emerald-600'},'✔')
+              ))
+            ),
+            React.createElement('div',{className:'mt-4 grid sm:grid-cols-3 gap-3'},
+              React.createElement('label',{className:'block'},
+                React.createElement('span',{className:'text-xs text-slate-500'},'Program Name'),
+                React.createElement('input',{value:brand,readOnly:true,className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-100'})
+              ),
+              React.createElement('label',{className:'block'},
+                React.createElement('span',{className:'text-xs text-slate-500'},'Order Quantity'),
+                React.createElement('input',{
+                  type:'number', min:requiredQty, step:5, value:qty,
+                  onChange:e=>setQty(Math.max(requiredQty, parseInt(e.target.value||requiredQty))),
+                  className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'
+                })
+              ),
+              React.createElement('div',{className:'rounded-xl bg-slate-100 p-3 text-sm'},
+                React.createElement('div',{className:'flex items-center gap-2'},'ℹ️','Remaining Slots'),
+                React.createElement('div',{className:`mt-1 text-lg font-semibold ${remaining<0?'text-rose-600':''}`}, remaining>=0?remaining:0)
+              )
+            )
+          ),
+
+          // 2) Select Items (scrollable grid)
+          React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
+            React.createElement('h2',{className:'text-lg font-semibold'},'2) Select Items'),
+            React.createElement('p',{className:'text-sm text-slate-500'},`Choose up to ${tier.slots} items for your ${tier.name}.`),
+            React.createElement('div',{className:'mt-4 max-h-[60vh] overflow-y-auto pr-1'},
+              React.createElement('div',{className:'grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
+                CATALOG.map(item => {
+                  const active   = selected.includes(item.id);
+                  const disabled = !active && selected.length >= tier.slots;
+                  return React.createElement('button',{
+                      key:item.id, onClick:()=>toggle(item.id),
+                      className:`group rounded-2xl border p-4 text-left transition ${active?'border-[var(--drh-navy)] ring-1 ring-[var(--drh-navy)] shadow':'border-slate-200 hover:shadow'} ${disabled?'opacity-40 pointer-events-none':''}`
+                    },
+                    React.createElement('div',{className:'relative'},
+                      React.createElement('div',{className:'aspect-[4/3] w-full rounded-xl bg-white grid place-items-center overflow-hidden'},
+                        React.createElement(ProductImage, { id:item.id, alt:item.name })
+                      ),
+                      active && React.createElement('span',{className:'absolute -top-2 -right-2 h-7 w-7 rounded-full bg-[var(--drh-navy)] text-white grid place-items-center'},'✔')
+                    ),
+                    React.createElement('div',{className:'mt-3 font-medium'},item.name),
+                    React.createElement('div',{className:'mt-1 text-sm'},'$'+item.base.toFixed(2))
+                  );
+                })
+              )
+            )
+          )
+        ),
+
+        // Right column: Box Preview + Summary
+        React.createElement('section',{className:'lg:col-span-2 space-y-6'},
+
+          // 3) Box Preview
+          React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
+            React.createElement('h2',{className:'text-lg font-semibold'},'3) Box Preview'),
+            React.createElement('div',{className:'mt-4 aspect-square rounded-2xl bg-slate-100 p-4'},
+              React.createElement('div',{className:`h-full w-full rounded-xl border-2 border-dashed border-slate-300 grid ${previewColsClass} gap-3 p-3`},
+                Array.from({length:tier.slots}).map((_, idx) => {
+                  const id   = selected[idx];
+                  const item = CATALOG.find(i=>i.id===id);
+                  return React.createElement('div',{
+                      key:idx,
+                      className:`rounded-xl border border-slate-200 bg-white p-2 grid content-between`
+                    },
+                    id
+                      ? React.createElement(React.Fragment,null,
+                          React.createElement('div',{className:'w-full aspect-[4/3] rounded-md bg-white grid place-items-center overflow-hidden'},
+                            React.createElement(ProductImage,{ id:item.id, alt:item.name })
+                          ),
+                          React.createElement('div',{className:'mt-1 text-[11px] text-center text-slate-600 truncate', title:item.name}, item.name)
+                        )
+                      : React.createElement('div',{className:'h-full grid place-items-center text-xs text-slate-400'},'Empty Slot')
+                  );
+                })
+              ),
+              React.createElement('div',{className:'mt-2 text-center text-xs text-slate-600'},'Brand: ',
+                React.createElement('span',{className:'font-medium text-slate-800'},'D.R. Horton')
+              )
+            )
+          ),
+
+          // 4) Summary & Submit
+          React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
+            React.createElement('h2',{className:'text-lg font-semibold'},'4) Summary & Submit'),
+            React.createElement('div',{className:'mt-2 space-y-2 text-sm'},
+              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Box Tier'),React.createElement('span',{className:'font-medium'},tier.name)),
+              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Items Selected'),React.createElement('span',{className:'font-medium'},selected.length,' / ',tier.slots)),
+              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Estimated Price / ea'),React.createElement('span',{className:'font-semibold'},'$',priceEach)),
+              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Order Quantity'),React.createElement('span',{className:'font-medium'},qty)),
+              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Rough Total'),React.createElement('span',{className:'font-semibold'},'$',total))
+            ),
+            React.createElement('div',{className:'mt-4 grid gap-3'},
+              React.createElement('label',{className:'block'},
+                React.createElement('span',{className:'text-xs text-slate-500'},'Contact Email (required)'),
+                React.createElement('input',{type:'email',placeholder:'you@company.com',value:email,onChange:e=>setEmail(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'})
+              ),
+              React.createElement('button',{onClick:submit,disabled:sending,className:`px-4 py-2 rounded-xl text-white ${sending?'bg-slate-400':'bg-[var(--drh-navy)] hover:opacity-90'}`},sending?'Submitting…':'Submit Selections'),
+              error && React.createElement('div',{className:'text-rose-600 text-sm'},error)
+            )
+          )
+        )
+      )
+    ); // end return
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(React.createElement(App));
+  </script>
+</body>
+</html>
