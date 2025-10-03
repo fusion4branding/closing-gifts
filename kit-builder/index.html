@@ -232,7 +232,20 @@
       // Header bar
       React.createElement('header',{className:'sticky top-0 z-30 bg-[var(--drh-navy)] text-white'},
         React.createElement('div',{className:'max-w-6xl mx-auto px-4 py-4 flex items-center justify-between'},
-          React.createElement('div',{className:'font-semibold'},'D.R. Horton — Gift Builder'),
+          React.createElement(
+  'a',
+  { href: 'index.html', className: 'flex items-center gap-3' },   // use '#' or 'builder.html' if no index page
+  React.createElement('img', {
+    src: 'img/drh-logo-white.svg',
+    onError: (e) => { e.currentTarget.src = 'img/drh-logo-white.png'; },
+    alt: 'D.R. Horton',
+    className: 'h-7 md:h-8 w-auto select-none',
+    decoding: 'async',
+    loading: 'eager'
+  }),
+  React.createElement('span', { className: 'hidden sm:inline font-semibold' }, '— Gift Builder'),
+  React.createElement('span', { className: 'sr-only' }, 'D.R. Horton — Gift Builder')
+),
           React.createElement('div',{className:'flex items-center gap-6 text-sm'},
             React.createElement('div',null,
               React.createElement('div',{className:'text-white/80'},'Estimate / ea'),
@@ -280,7 +293,7 @@
             ),
             React.createElement('div',{className:'mt-4 grid sm:grid-cols-3 gap-3'},
               React.createElement('label',{className:'block'},
-                React.createElement('span',{className:'text-xs text-slate-500'},'Program Name'),
+                React.createElement('span',{className:'text-xs text-slate-500'},'Company'),
                 React.createElement('input',{value:brand,readOnly:true,className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-100'})
               ),
               React.createElement('label',{className:'block'},
