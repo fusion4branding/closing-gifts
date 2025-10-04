@@ -232,20 +232,19 @@
       // Header bar
       React.createElement('header',{className:'sticky top-0 z-30 bg-[var(--drh-navy)] text-white'},
         React.createElement('div',{className:'max-w-6xl mx-auto px-4 py-4 flex items-center justify-between'},
-          React.createElement(
+React.createElement(
   'a',
-  { href: 'index.html', className: 'flex items-center gap-3' },   // use '#' or 'builder.html' if no index page
+  { href: 'index.html', className: 'flex items-center' },
   React.createElement('img', {
-    src: 'img/drh-logo-white.svg',
-    onError: (e) => { e.currentTarget.src = 'img/drh-logo-white.png'; },
+    // use PNG directly; change if you actually have the SVG
+    src: 'img/drh-logo-white.png',
     alt: 'D.R. Horton',
-    className: 'h-7 md:h-8 w-auto select-none',
+    className: 'h-12 md:h-14 w-auto select-none', // bigger logo
     decoding: 'async',
     loading: 'eager'
-  }),
-  React.createElement('span', { className: 'hidden sm:inline font-semibold' }, '— Gift Builder'),
-  React.createElement('span', { className: 'sr-only' }, 'D.R. Horton — Gift Builder')
+  })
 ),
+
           React.createElement('div',{className:'flex items-center gap-6 text-sm'},
             React.createElement('div',null,
               React.createElement('div',{className:'text-white/80'},'Estimate / ea'),
