@@ -262,9 +262,18 @@ React.createElement(
       React.createElement('main',{className:'max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-5 gap-6'},
 
         // Recommended sets (no scrolling; 3-up)
-        React.createElement('div',{className:'lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'},
-          RECOMMENDED_SETS.map(s => React.createElement(SetCard,{key:s.id,set:s}))
-        ),
+/* Recommended Sets title + row */
+React.createElement('div', { className:'lg:col-span-5' },
+  React.createElement('h2', {
+    className: 'text-sm font-semibold tracking-wide text-slate-600 uppercase mb-3'
+  }, 'Recommended Set'),
+  React.createElement('div', {
+    className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'
+  },
+    RECOMMENDED_SETS.map(s => React.createElement(SetCard, { key:s.id, set:s }))
+  )
+),
+
 
         // Left column: Select Kit + Select Items
         React.createElement('section',{className:'lg:col-span-3 space-y-6'},
