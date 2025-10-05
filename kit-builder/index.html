@@ -27,8 +27,6 @@
   const { useMemo, useState, useEffect } = React;
 
   // ---------- Catalog ----------
-  // base = price per unit at item's MOQ. moq = item MOQ (used to gate order qty).
-  // Place images in /img with these IDs as filenames: img/<id>.webp (PNG fallback).
   const CATALOG = [
     { id:"cutting_board_two_tone",      name:'11" Two-Tone Cutting Board',                          base:8.67,  moq:48,  img:"notebook" },
     { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20,  img:"box"      },
@@ -76,11 +74,13 @@
     { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12,  img:"pen"      },
   ];
 
-  // Recommended sets (auto-pick tier by number of items)
+  // Recommended sets (now with optional custom thumbnails)
+  // Put your images in /kit-builder/img/ as:
+  //   reco_good.webp/png, reco_better.webp/png, reco_best.webp/png
   const RECOMMENDED_SETS = [
-    { id:'good',   label:'Good',   items:['tumbler_oasis_20oz','cutting_board_two_tone','utensil_set_bamboo_silicone'] },
-    { id:'better', label:'Better', items:['tumbler_pinnacle_40oz','plush_blanket_50x60','wine_tools_bamboo_4pc','finch_jar_wood_lid'] },
-    { id:'best',   label:'Best',   items:['myrnam_cooler_backpack','satechi_findall_keychain','hypergear_multi_plug_5','lex_bamboo_speaker_charger','growler_64oz_beast'] },
+    { id:'good',   label:'Good',   thumb:'reco_good',   items:['tumbler_oasis_20oz','cutting_board_two_tone','utensil_set_bamboo_silicone'] },
+    { id:'better', label:'Better', thumb:'reco_better', items:['tumbler_pinnacle_40oz','plush_blanket_50x60','wine_tools_bamboo_4pc','finch_jar_wood_lid'] },
+    { id:'best',   label:'Best',   thumb:'reco_best',   items:['myrnam_cooler_backpack','satechi_findall_keychain','hypergear_multi_plug_5','lex_bamboo_speaker_charger','growler_64oz_beast'] },
   ];
 
   const BOX_TIERS = [
@@ -114,15 +114,14 @@
 
   // ---------- App ----------
   function App(){
-    const [tier,setTier]         = useState(BOX_TIERS[1]);    // default: Standard
-    const [selected,setSelected] = useState([]);              // item ids in pick order
+    const [tier,setTier]         = useState(BOX_TIERS[1]);
+    const [selected,setSelected] = useState([]);
     const [qty,setQty]           = useState(25);
     const [brand]                = useState('D.R. Horton');
     const [email,setEmail]       = useState('');
     const [sending,setSending]   = useState(false);
     const [error,setError]       = useState('');
 
-    // Enforce order quantity >= largest item MOQ selected
     const requiredQty = useMemo(
       () => Math.max(1, ...selected.map(id => (CATALOG.find(i=>i.id===id)?.moq || 1))),
       [selected]
@@ -131,7 +130,6 @@
 
     const remaining = tier.slots - selected.length;
 
-    // Price per kit = sum(selected base prices) + pack
     const priceEach = useMemo(()=>{
       const items = selected.map(id => CATALOG.find(i=>i.id===id));
       const itemSum = items.reduce((s,i)=>s+(i?.base||0),0);
@@ -140,7 +138,6 @@
 
     const total = useMemo(()=> (qty * parseFloat(priceEach||0)).toFixed(2), [qty, priceEach]);
 
-    // Item toggling preserves order; no more than slots
     function toggle(id){
       setSelected(prev =>
         prev.includes(id)
@@ -149,15 +146,13 @@
       );
     }
 
-    // Selecting a TIER clears selections (per your request)
     function onTierClick(b){
       setTier(b);
       setSelected([]);         // zero selected
     }
 
-    // Selecting a RECOMMENDED SET: auto set tier & items
     function chooseSet(set) {
-      const items = set.items.slice(0, 5);       // safety
+      const items = set.items.slice(0, 5);
       const t = BOX_TIERS.find(x => x.slots === items.length) || tier;
       setTier(t);
       setSelected(items);
@@ -165,6 +160,7 @@
 
     function SetCard({set}) {
       const first = CATALOG.find(i => i.id === set.items[0]);
+      const thumbId = set.thumb || (first ? first.id : null);
       const active = selected.length === set.items.length &&
                      set.items.every(id => selected.includes(id));
       return React.createElement('button', {
@@ -175,8 +171,8 @@
       },
         React.createElement('div', { className:'flex items-center gap-3' },
           React.createElement('div', { className:'h-12 w-12 rounded-xl bg-slate-100 grid place-items-center overflow-hidden' },
-            first
-              ? React.createElement(ProductImage, { id:first.id, alt:first.name, className:'w-12 h-12 object-contain' })
+            thumbId
+              ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set', className:'w-12 h-12 object-contain' })
               : React.createElement(Icon, { kind:'box', className:'w-12 h-12 text-slate-400' })
           ),
           React.createElement('div', { className:'min-w-0' },
@@ -187,7 +183,6 @@
       );
     }
 
-    // Preview grid columns: 4 -> 2 cols; 3 or 5 -> 3 cols
     const previewColsClass = tier.slots === 4 ? 'grid-cols-2' : 'grid-cols-3';
 
     async function submit(){
@@ -213,7 +208,7 @@
       try{
         const res = await fetch(ENDPOINT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' }, // avoid preflight
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(payload),
         });
         const txt = await res.text();
@@ -232,28 +227,12 @@
       // Header bar
       React.createElement('header',{className:'sticky top-0 z-30 bg-[var(--drh-navy)] text-white'},
         React.createElement('div',{className:'max-w-6xl mx-auto px-4 py-4 flex items-center justify-between'},
-React.createElement(
-  'a',
-  { href: '../', className: 'flex items-center' },
-  React.createElement('img', {
-    // use PNG directly; change if you actually have the SVG
-    src: 'img/drh-logo-white.png',
-    alt: 'D.R. Horton',
-    className: 'h-12 md:h-14 w-auto select-none', // bigger logo
-    decoding: 'async',
-    loading: 'eager'
-  })
-),
-
+          React.createElement('a',{ href: '../', className:'flex items-center' },
+            React.createElement('img',{ src:'img/drh-logo-white.png', alt:'D.R. Horton', className:'h-12 md:h-14 w-auto select-none', decoding:'async', loading:'eager' })
+          ),
           React.createElement('div',{className:'flex items-center gap-6 text-sm'},
-            React.createElement('div',null,
-              React.createElement('div',{className:'text-white/80'},'Estimate / ea'),
-              React.createElement('div',{className:'text-lg font-semibold'},'$'+priceEach)
-            ),
-            React.createElement('div',null,
-              React.createElement('div',{className:'text-white/80'},'Order Qty'),
-              React.createElement('div',{className:'text-lg font-semibold'},qty)
-            )
+            React.createElement('div',null,React.createElement('div',{className:'text-white/80'},'Estimate / ea'),React.createElement('div',{className:'text-lg font-semibold'},'$'+priceEach)),
+            React.createElement('div',null,React.createElement('div',{className:'text-white/80'},'Order Qty'),React.createElement('div',{className:'text-lg font-semibold'},qty))
           )
         )
       ),
@@ -261,19 +240,17 @@ React.createElement(
       // Main grid
       React.createElement('main',{className:'max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-5 gap-6'},
 
-        // Recommended sets (no scrolling; 3-up)
-/* Recommended Sets title + row */
-React.createElement('div', { className:'lg:col-span-5' },
-  React.createElement('h2', {
-    className: 'text-sm font-semibold tracking-wide text-slate-600 uppercase mb-3'
-  }, 'Recommended Set'),
-  React.createElement('div', {
-    className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'
-  },
-    RECOMMENDED_SETS.map(s => React.createElement(SetCard, { key:s.id, set:s }))
-  )
-),
-
+        // Recommended Sets title + row (centered & bigger)
+        React.createElement('div', { className:'lg:col-span-5' },
+          React.createElement('h2', {
+            className: 'text-2xl font-bold text-[var(--drh-navy)] text-center mb-4'
+          }, 'Recommended Set'),
+          React.createElement('div', {
+            className: 'max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'
+          },
+            RECOMMENDED_SETS.map(s => React.createElement(SetCard, { key:s.id, set:s }))
+          )
+        ),
 
         // Left column: Select Kit + Select Items
         React.createElement('section',{className:'lg:col-span-3 space-y-6'},
@@ -358,10 +335,7 @@ React.createElement('div', { className:'lg:col-span-5' },
                 Array.from({length:tier.slots}).map((_, idx) => {
                   const id   = selected[idx];
                   const item = CATALOG.find(i=>i.id===id);
-                  return React.createElement('div',{
-                      key:idx,
-                      className:`rounded-xl border border-slate-200 bg-white p-2 grid content-between`
-                    },
+                  return React.createElement('div',{ key:idx, className:'rounded-xl border border-slate-200 bg-white p-2 grid content-between' },
                     id
                       ? React.createElement(React.Fragment,null,
                           React.createElement('div',{className:'w-full aspect-[4/3] rounded-md bg-white grid place-items-center overflow-hidden'},
