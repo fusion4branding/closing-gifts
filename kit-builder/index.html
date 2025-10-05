@@ -74,8 +74,8 @@
     { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12,  img:"pen"      },
   ];
 
-  // Recommended sets (now with optional custom thumbnails)
-  // Put your images in /kit-builder/img/ as:
+  // Recommended sets (custom thumbnails)
+  // Put images in /kit-builder/img/:
   //   reco_good.webp/png, reco_better.webp/png, reco_best.webp/png
   const RECOMMENDED_SETS = [
     { id:'good',   label:'Good',   thumb:'reco_good',   items:['tumbler_oasis_20oz','cutting_board_two_tone','utensil_set_bamboo_silicone'] },
@@ -100,7 +100,7 @@
     return React.createElement('div',{className:'w-14 h-14 rounded-lg bg-slate-300'});
   }
 
-  // Use /img/<id>.webp with PNG fallback
+  // Product image with webp → png fallback
   function ProductImage({ id, alt, className }) {
     const webp = `img/${id}.webp`;
     const png  = `img/${id}.png`;
@@ -119,6 +119,7 @@
     const [qty,setQty]           = useState(25);
     const [brand]                = useState('D.R. Horton');
     const [email,setEmail]       = useState('');
+    const [phone,setPhone]       = useState('');     // NEW optional phone
     const [sending,setSending]   = useState(false);
     const [error,setError]       = useState('');
 
@@ -159,30 +160,30 @@
     }
 
     function SetCard({set}) {
-      const first = CATALOG.find(i => i.id === set.items[0]);
+      const first   = CATALOG.find(i => i.id === set.items[0]);
       const thumbId = set.thumb || (first ? first.id : null);
-      const active = selected.length === set.items.length &&
-                     set.items.every(id => selected.includes(id));
-return React.createElement('button', {
-  onClick: () => chooseSet(set),
-  className:
-    `group rounded-2xl border p-6 text-left transition bg-white
-     ${active ? 'border-[var(--drh-navy)] ring-2 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow-md'}`
-},
-  React.createElement('div', { className:'flex items-center gap-4' },
-    React.createElement('div', {
-      className:'h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white ring-1 ring-slate-200 grid place-items-center overflow-hidden'
-    },
-      thumbId
-        ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set', className:'w-full h-full object-contain' })
-        : React.createElement(Icon, { kind:'box', className:'w-full h-full text-slate-400' })
-    ),
-    React.createElement('div', { className:'min-w-0' },
-      React.createElement('div', { className:'text-lg md:text-xl font-semibold' }, set.label),
-      React.createElement('div', { className:'text-xs text-slate-500' }, `${set.items.length} items`)
-    )
-  )
-);
+      const active  = selected.length === set.items.length &&
+                      set.items.every(id => selected.includes(id));
+      return React.createElement('button', {
+        onClick: () => chooseSet(set),
+        className:
+          `group rounded-2xl border p-6 text-left transition bg-white
+           ${active ? 'border-[var(--drh-navy)] ring-2 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow-md'}`
+      },
+        React.createElement('div', { className:'flex items-center gap-4' },
+          React.createElement('div', {
+            className:'h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white ring-1 ring-slate-200 grid place-items-center overflow-hidden'
+          },
+            thumbId
+              ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set', className:'w-full h-full object-contain' })
+              : React.createElement(Icon, { kind:'box', className:'w-full h-full text-slate-400' })
+          ),
+          React.createElement('div', { className:'min-w-0' },
+            React.createElement('div', { className:'text-lg md:text-xl font-semibold' }, set.label),
+            React.createElement('div', { className:'text-xs text-slate-500' }, `${set.items.length} items`)
+          )
+        )
+      );
     }
 
     const previewColsClass = tier.slots === 4 ? 'grid-cols-2' : 'grid-cols-3';
@@ -196,6 +197,7 @@ return React.createElement('button', {
         admin: ADMIN_EMAIL,
         site: SITE_NAME,
         email,
+        phone,                          // include optional phone
         brand,
         tier: { id:tier.id, name:tier.name, slots:tier.slots, pack:tier.pack },
         qty,
@@ -242,16 +244,20 @@ return React.createElement('button', {
       // Main grid
       React.createElement('main',{className:'max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-5 gap-6'},
 
-        // Recommended Sets title + row (centered & bigger)
+        // Recommended Sets title + row + helper line
         React.createElement('div', { className:'lg:col-span-5' },
           React.createElement('h2', {
-            className: 'text-2xl font-bold text-[var(--drh-navy)] text-center mb-4'
+            className: 'text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center mb-4'
           }, 'RECOMMENDED SETS'),
           React.createElement('div', {
-            className: 'max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'
+            className: 'max-w-5xl mx-auto grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4'
           },
             RECOMMENDED_SETS.map(s => React.createElement(SetCard, { key:s.id, set:s }))
-          )
+          ),
+// helper line as a full-size heading, same style as the main title
+React.createElement('h2', {
+  className: 'mt-4 text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center'
+}, 'CUSTOMIZE YOUR KIT')
         ),
 
         // Left column: Select Kit + Select Items
@@ -369,6 +375,10 @@ return React.createElement('button', {
               React.createElement('label',{className:'block'},
                 React.createElement('span',{className:'text-xs text-slate-500'},'Contact Email (required)'),
                 React.createElement('input',{type:'email',placeholder:'you@company.com',value:email,onChange:e=>setEmail(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'})
+              ),
+              React.createElement('label',{className:'block'},  // NEW optional phone
+                React.createElement('span',{className:'text-xs text-slate-500'},'Phone (optional)'),
+                React.createElement('input',{type:'tel',placeholder:'(555) 555-5555',value:phone,onChange:e=>setPhone(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'})
               ),
               React.createElement('button',{onClick:submit,disabled:sending,className:`px-4 py-2 rounded-xl text-white ${sending?'bg-slate-400':'bg-[var(--drh-navy)] hover:opacity-90'}`},sending?'Submitting…':'Submit Selections'),
               error && React.createElement('div',{className:'text-rose-600 text-sm'},error)
