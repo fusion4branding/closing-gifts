@@ -163,24 +163,26 @@
       const thumbId = set.thumb || (first ? first.id : null);
       const active = selected.length === set.items.length &&
                      set.items.every(id => selected.includes(id));
-      return React.createElement('button', {
-        onClick: () => chooseSet(set),
-        className:
-          `rounded-2xl border p-4 text-left transition bg-white
-           ${active ? 'border-[var(--drh-navy)] ring-1 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow'}`
-      },
-        React.createElement('div', { className:'flex items-center gap-3' },
-          React.createElement('div', { className:'h-12 w-12 rounded-xl bg-slate-100 grid place-items-center overflow-hidden' },
-            thumbId
-              ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set', className:'w-12 h-12 object-contain' })
-              : React.createElement(Icon, { kind:'box', className:'w-12 h-12 text-slate-400' })
-          ),
-          React.createElement('div', { className:'min-w-0' },
-            React.createElement('div', { className:'font-medium' }, set.label),
-            React.createElement('div', { className:'text-xs text-slate-500' }, `${set.items.length} items`)
-          )
-        )
-      );
+return React.createElement('button', {
+  onClick: () => chooseSet(set),
+  className:
+    `group rounded-2xl border p-6 text-left transition bg-white
+     ${active ? 'border-[var(--drh-navy)] ring-2 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow-md'}`
+},
+  React.createElement('div', { className:'flex items-center gap-4' },
+    React.createElement('div', {
+      className:'h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white ring-1 ring-slate-200 grid place-items-center overflow-hidden'
+    },
+      thumbId
+        ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set', className:'w-full h-full object-contain' })
+        : React.createElement(Icon, { kind:'box', className:'w-full h-full text-slate-400' })
+    ),
+    React.createElement('div', { className:'min-w-0' },
+      React.createElement('div', { className:'text-lg md:text-xl font-semibold' }, set.label),
+      React.createElement('div', { className:'text-xs text-slate-500' }, `${set.items.length} items`)
+    )
+  )
+);
     }
 
     const previewColsClass = tier.slots === 4 ? 'grid-cols-2' : 'grid-cols-3';
@@ -244,7 +246,7 @@
         React.createElement('div', { className:'lg:col-span-5' },
           React.createElement('h2', {
             className: 'text-2xl font-bold text-[var(--drh-navy)] text-center mb-4'
-          }, 'Recommended Set'),
+          }, 'RECOMMENDED SETS'),
           React.createElement('div', {
             className: 'max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'
           },
