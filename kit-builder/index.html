@@ -218,7 +218,7 @@
         });
         const txt = await res.text();
         if(!res.ok) throw new Error('Server '+res.status+': '+txt);
-        window.location.href = '..thankyou/';
+        window.location.href = '../thankyou/';
       }catch(err){
         console.error(err);
         setError('Submit failed. '+String(err).slice(0,300));
