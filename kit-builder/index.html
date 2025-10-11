@@ -74,7 +74,7 @@
     { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12,  img:"pen"      },
   ];
 
-  // Recommended sets (custom thumbnails in /kit-builder/img/)
+  // Recommended sets (custom thumbnails in /img/)
   const RECOMMENDED_SETS = [
     { id:'good',   label:'Good',   thumb:'reco_good',
       items:['tumbler_oasis_20oz','cutting_board_two_tone','utensil_set_bamboo_silicone'] },
@@ -118,7 +118,8 @@
     const [tier,setTier]         = useState(BOX_TIERS[1]);
     const [selected,setSelected] = useState([]);
     const [qty,setQty]           = useState(25);
-    const [brand]                = useState('D.R. Horton');
+    const [division,setDivision] = useState('');       // NEW: Division
+    const [name,setName]         = useState('');       // NEW: First & Last name
     const [email,setEmail]       = useState('');
     const [phone,setPhone]       = useState('');
     const [sending,setSending]   = useState(false);
@@ -199,9 +200,12 @@
       const payload = {
         admin: ADMIN_EMAIL,
         site: SITE_NAME,
+        // requester details
+        name,
+        division,
         email,
         phone,
-        brand,
+        // order
         tier: { id:tier.id, name:tier.name, slots:tier.slots, pack:tier.pack },
         qty,
         priceEach,
@@ -223,7 +227,7 @@
         window.location.href = '../thankyou/';
       }catch(err){
         console.error(err);
-        setError('Submit failed. '+String(err).slice(0,300));
+        setError('Checkout failed. '+String(err).slice(0,300));
       }finally{
         setSending(false);
       }
@@ -247,13 +251,13 @@
       // Main grid
       React.createElement('main',{className:'max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-5 gap-6'},
 
-        // Recommended Sets
+        // Hank’s Pre-Built Sets
         React.createElement('div', { className:'lg:col-span-5' },
-          React.createElement('h2', { className:'text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center mb-4' }, 'RECOMMENDED SETS'),
+          React.createElement('h2', { className:'text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center mb-4' }, "Hank’s Pre-Built Sets"),
           React.createElement('div', { className:'max-w-5xl mx-auto grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4' },
             RECOMMENDED_SETS.map(s => React.createElement(SetCard, { key:s.id, set:s }))
           ),
-          React.createElement('h2', { className:'mt-4 text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center' }, 'CUSTOMIZE YOUR KIT')
+          React.createElement('h2', { className:'mt-4 text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center' }, 'Create Your Own Kit')
         ),
 
         // Left column: Select Kit + Select Items
@@ -282,8 +286,8 @@
             ),
             React.createElement('div',{className:'mt-4 grid sm:grid-cols-3 gap-3'},
               React.createElement('label',{className:'block'},
-                React.createElement('span',{className:'text-xs text-slate-500'},'Company'),
-                React.createElement('input',{value:brand,readOnly:true,className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-100'})
+                React.createElement('span',{className:'text-xs text-slate-500'},'Division'),
+                React.createElement('input',{value:division,placeholder:'e.g., North Dallas',onChange:e=>setDivision(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2'})
               ),
               React.createElement('label',{className:'block'},
                 React.createElement('span',{className:'text-xs text-slate-500'},'Order Quantity'),
@@ -329,11 +333,10 @@
         // Right column: Box Preview + Summary
         React.createElement('section',{className:'lg:col-span-2 space-y-6'},
 
-          // 3) Box Preview
+          // 3) Preview your full project
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
-            React.createElement('h2',{className:'text-lg font-semibold'},'3) Box Preview'),
+            React.createElement('h2',{className:'text-lg font-semibold'},'3) Preview your full project'),
             React.createElement('div',{className:'mt-4 aspect-square rounded-2xl bg-slate-100 p-4'},
-              // NOTE: center 3- and 5-slot layouts; keep 4-slot 2×2 unchanged
               React.createElement('div',{className:`h-full w-full rounded-xl border-2 border-dashed border-slate-300 grid ${previewColsClass} ${centerGrid} gap-3 p-3`},
                 Array.from({length:tier.slots}).map((_, idx) => {
                   const id   = selected[idx];
@@ -341,7 +344,6 @@
                   return React.createElement('div',{ key:idx, className:'rounded-xl border border-slate-200 bg-white p-2 grid grid-rows-[1fr_auto] justify-items-stretch' },
                     id
                       ? React.createElement(React.Fragment,null,
-                          // CENTER the image inside each slot
                           React.createElement('div',{className:'w-full aspect-[4/3] rounded-md bg-white flex items-center justify-center overflow-hidden'},
                             React.createElement(ProductImage,{ id:item.id, alt:item.name })
                           ),
@@ -351,15 +353,13 @@
                   );
                 })
               ),
-              React.createElement('div',{className:'mt-2 text-center text-xs text-slate-600'},'Brand: ',
-                React.createElement('span',{className:'font-medium text-slate-800'},'D.R. Horton')
-              )
+              React.createElement('div',{className:'mt-2 text-center text-xs text-slate-600'},'D.R. Horton Logo')
             )
           ),
 
-          // 4) Summary & Submit
+          // 4) Summary
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
-            React.createElement('h2',{className:'text-lg font-semibold'},'4) Summary & Submit'),
+            React.createElement('h2',{className:'text-lg font-semibold'},'4) Summary'),
             React.createElement('div',{className:'mt-2 space-y-2 text-sm'},
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Box Tier'),React.createElement('span',{className:'font-medium'},tier.name)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Items Selected'),React.createElement('span',{className:'font-medium'},selected.length,' / ',tier.slots)),
@@ -369,6 +369,10 @@
             ),
             React.createElement('div',{className:'mt-4 grid gap-3'},
               React.createElement('label',{className:'block'},
+                React.createElement('span',{className:'text-xs text-slate-500'},'First & Last Name'),
+                React.createElement('input',{type:'text',placeholder:'Your name',value:name,onChange:e=>setName(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'})
+              ),
+              React.createElement('label',{className:'block'},
                 React.createElement('span',{className:'text-xs text-slate-500'},'Contact Email (required)'),
                 React.createElement('input',{type:'email',placeholder:'you@company.com',value:email,onChange:e=>setEmail(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'})
               ),
@@ -376,7 +380,7 @@
                 React.createElement('span',{className:'text-xs text-slate-500'},'Phone (optional)'),
                 React.createElement('input',{type:'tel',placeholder:'(555) 555-5555',value:phone,onChange:e=>setPhone(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'})
               ),
-              React.createElement('button',{onClick:submit,disabled:sending,className:`px-4 py-2 rounded-xl text-white ${sending?'bg-slate-400':'bg-[var(--drh-navy)] hover:opacity-90'}`},sending?'Submitting…':'Submit Selections'),
+              React.createElement('button',{onClick:submit,disabled:sending,className:`px-4 py-2 rounded-xl text-white ${sending?'bg-slate-400':'bg-[var(--drh-navy)] hover:opacity-90'}`},sending?'Processing…':'Checkout'),
               error && React.createElement('div',{className:'text-rose-600 text-sm'},error)
             )
           )
