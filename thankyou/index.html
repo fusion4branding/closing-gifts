@@ -3,60 +3,52 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Thanks! – D.R. Horton</title>
-  <meta name="theme-color" content="#182757" />
+  <title>Thanks — D.R. Horton</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Calendly inline embed -->
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+
   <style>
     :root { --drh-navy:#182757; }
     body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   </style>
-  <!-- Calendly popup widget -->
-  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
 </head>
-
 <body class="bg-slate-50 text-slate-800">
   <!-- Header -->
   <header class="bg-[var(--drh-navy)] text-white">
-    <div class="max-w-6xl mx-auto px-4 py-4">
-      <img src="drh-logo-white.png" alt="D.R. Horton" class="h-12 md:h-14 w-auto select-none" loading="eager" decoding="async">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center">
+      <a href="../" class="flex items-center">
+        <img src="drh-logo-white.png" alt="D.R. Horton" class="h-10 w-auto select-none" />
+      </a>
     </div>
   </header>
 
   <!-- Main -->
-  <main class="max-w-xl mx-auto px-4 py-16">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
-      <!-- check icon -->
-      <svg class="mx-auto h-14 w-14 text-emerald-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm4.97 7.03a.75.75 0 0 1 0 1.06l-6 6a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 0 1 1.06-1.06l2.47 2.47 5.47-5.47a.75.75 0 0 1 1.06 0Z"/>
-      </svg>
+  <main class="max-w-5xl mx-auto px-4 py-8 grid gap-6">
+    <!-- Confirmation card -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
+      <div class="mx-auto h-10 w-10 rounded-full bg-emerald-100 text-emerald-600 grid place-items-center mb-3">✓</div>
+      <h1 class="text-xl font-semibold">Thank you for the project!</h1>
+      <p class="text-slate-600 mt-1">Check the email you submitted for a confirmation email.
 
-      <h1 class="mt-4 text-2xl font-semibold text-slate-900">Thanks! Your selection was submitted.</h1>
-      <p class="mt-2 text-slate-600">
-        We’ve emailed a confirmation. We’ll follow up with proofs and a formal quote.
-      </p>
+In the meantime… meet with Hank to learn more about our process, timeline, and custom pricing we can offer.</p>
+    </section>
 
-      <!-- Calendly button -->
-      <div class="mt-8">
-        <button
-          class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[var(--drh-navy)] text-white font-medium hover:opacity-90"
-          onclick="Calendly.initPopupWidget({ url: 'https://calendly.com/YOUR-CALENDLY-SLUG/quote' }); return false;">
-          Request a Quote
-        </button>
-        <noscript>
-          <a href="https://calendly.com/YOUR-CALENDLY-SLUG/quote" class="inline-block mt-3 text-[var(--drh-navy)] underline">Open Calendly</a>
-        </noscript>
+    <!-- Calendly inline widget -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- Replace the data-url with Hank’s actual Calendly link -->
+      <div
+        class="calendly-inline-widget"
+        data-url="https://calendly.com/hank-fusion4branding/30min?hide_event_type_details=1&hide_landing_page_details=1&background_color=f8fafc&text_color=0f172a&primary_color=182757"
+        style="min-width:320px;height:780px;">
       </div>
+    </section>
 
-      <div class="mt-6 text-xs text-slate-500">
-        Need help? Reply to the confirmation email and we’ll jump in.
-      </div>
-    </div>
+    <footer class="text-center text-xs text-slate-500 pb-10">
+      © 2025 Fusion4Branding • Closing Gifts
+    </footer>
   </main>
-
-  <!-- Footer (optional, muted) -->
-  <footer class="text-center text-xs text-slate-500 pb-10">
-    © 2025 Fusion4Branding • Closing Gifts
-  </footer>
 </body>
 </html>
