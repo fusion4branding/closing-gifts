@@ -49,7 +49,6 @@
   }
 
   // ---------- CATALOG ----------
-  // Keep ALL your original items here (unchanged)
   const CATALOG_BASE = [
     { id:"cutting_board_two_tone",      name:'11" Two-Tone Cutting Board',                          base:8.67,  moq:48  },
     { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20  },
@@ -97,7 +96,6 @@
     { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12  }
   ];
 
-  // New items to ADD (MOQ pricing) — no duplicates with BASE
   const CATALOG_ADDITIONS = [
     { id:"tea_towel_rpet",              name:"Sublimated RPET Tea Towel",                           base:5.15,  moq:100 },
     { id:"pizza_cutter_mammamia",       name:"Mamma Mia Pizza Cutter",                              base:4.56,  moq:100 },
@@ -113,8 +111,6 @@
     { id:"car_caddy",                   name:"Car Caddy",                                           base:3.77,  moq:100 },
     { id:"fleece_roll_blanket",         name:"Fleece Roll Up Blanket",                              base:10.49, moq:75  },
     { id:"oceanside_keychain_blue",     name:"Oceanside Leather Key Chain — Blue",                  base:5.13,  moq:250 },
-
-    // Hank’s Good/Better/Best new pieces
     { id:"yacht_club_boat_tote",        name:"Yacht Club Boat Tote — 20.5\" × 13\" × 6.7\"",        base:13.98, moq:25  },
     { id:"ceramic_bowl_candle_16oz",    name:"16 oz Ceramic Bowl Candle",                           base:24.00, moq:48  },
     { id:"coaster_slate_square",        name:"Square Slate Coaster",                                base:5.18,  moq:50  },
@@ -125,7 +121,6 @@
     { id:"stark_2_bluetooth_speaker",   name:"Stark 2.0 Bluetooth® Speaker",                        base:21.40, moq:50  }
   ];
 
-  // Final catalog used by the app
   const CATALOG = [...CATALOG_BASE, ...CATALOG_ADDITIONS];
 
   // Pre-built sets
@@ -261,7 +256,7 @@
     }
 
     // ---------- UI ----------
-    return React.createElement('div', null,
+    return React.createElement(React.Fragment, null,
       // Header
       React.createElement('header',{className:'sticky top-0 z-30 bg-[var(--drh-navy)] text-white'},
         React.createElement('div',{className:'max-w-6xl mx-auto px-4 py-4 flex items-center justify-between'},
@@ -358,8 +353,8 @@
                         active && React.createElement('span',{className:'absolute -top-2 -right-2 h-7 w-7 rounded-full bg-[var(--drh-navy)] text-white grid place-items-center'},'✔')
                       ),
                       React.createElement('div',{className:'mt-3 font-medium'},item.name),
-                      React.createElement('div',{className:'mt-1 text-sm'},'$'+item.base.toFixed(2)),
-                      React.createElement('div',{className:'text-[11px] text-slate-500'},'MOQ ', item.moq || 1)
+                      React.createElement('div',{className:'mt-1 text-sm'},'$'+item.base.toFixed(2))
+                      // MOQ line removed from UI
                     );
                   })
               )
@@ -427,6 +422,13 @@
               error && React.createElement('div',{className:'text-rose-600 text-sm'},error)
             )
           )
+        )
+      ),
+
+      // Footer (matches the landing page)
+      React.createElement('footer',{className:'border-t mt-10 bg-white'},
+        React.createElement('div',{className:'max-w-6xl mx-auto px-4 py-8 text-center text-slate-500 text-sm'},
+          `© ${new Date().getFullYear()} Fusion4Branding • Closing Gifts`
         )
       )
     ); // end return
