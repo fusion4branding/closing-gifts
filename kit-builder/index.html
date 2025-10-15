@@ -19,14 +19,14 @@
 
   <script>
   // ================= CONFIG =================
-  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyMRTpMiGD_d56NPpoXxlwZdwXaLpcOAtUq_kGC7zNH2kljgDp_PfX7tEC2TrGXc3Z70g/exec";
-  const ADMIN_EMAIL  = "roselleralegre2019@gmail.com";
+  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyfUR0kr0idYBlqcSa1U925JUpcvPepuQN6GXWHvxLNU4UGzPGXcpBsnTl6fxrC0Bwo-Q/exec";
+  const ADMIN_EMAIL  = "Hank@fusion4branding.com";
   const SITE_NAME    = "D.R. Horton — Welcome Gift";
   // ==========================================
 
   const { useMemo, useState, useEffect } = React;
 
-  // ---------- Visual helpers ----------
+  // ---------- Icons & Images ----------
   function Icon({kind, className}) {
     const c = className || 'w-14 h-14 text-slate-400';
     if(kind==='mug')      return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('rect',{x:28,y:28,width:56,height:64,rx:8,fill:'currentColor'}),React.createElement('rect',{x:84,y:40,width:16,height:28,rx:6,fill:'currentColor'}));
@@ -37,7 +37,6 @@
     return React.createElement('div',{className:'w-14 h-14 rounded-lg bg-slate-300'});
   }
 
-  // Product image with webp → png fallback
   function ProductImage({ id, alt, className }) {
     const webp = `img/${id}.webp`;
     const png  = `img/${id}.png`;
@@ -49,98 +48,92 @@
     });
   }
 
-  // ---------- Catalog ----------
-  // All ORIGINAL items (kept) + ALL NEW items (added)
-  // base = MOQ unit price; moq = MOQ quantity
-  const CATALOG_RAW = [
-    // ----- ORIGINAL LIST (unchanged IDs & prices) -----
-    { id:"cutting_board_two_tone",      name:'11" Two-Tone Cutting Board',                          base:8.67,  moq:48,  img:"notebook" },
-    { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20,  img:"box"      },
-    { id:"tumbler_oasis_20oz",          name:'Oasis-II 20 oz Stainless Tumbler',                    base:9.60,  moq:36,  img:"mug"      },
-    { id:"vacuum_dynamo_portable",      name:'Dynamo Rechargeable Portable Vacuum',                 base:10.70, moq:40,  img:"towel"    },
-    { id:"trunk_organizer_expandable",  name:'Expandable Trunk Organizer',                          base:11.45, moq:50,  img:"box"      },
-    { id:"box_corrugated_large_black",  name:'Black Corrugated Large Box',                          base:11.81, moq:100, img:"box"      },
-    { id:"screwdriver_artisan_20pc",    name:'Best Buddy Tools® Artisan Screwdriver Set (20-pc)',   base:12.25, moq:30,  img:"pen"      },
-    { id:"cooler_lunch_ultimate",       name:'Ultimate Lunch Bag Cooler',                           base:12.49, moq:100, img:"towel"    },
-    { id:"camp_mug_14oz",               name:'14 oz Powder-Coated Camping Mug',                     base:15.95, moq:48,  img:"mug"      },
-    { id:"car_wash_pit_crew",           name:'Pit Crew 9-Piece Car Wash Detailing Kit',             base:16.67, moq:25,  img:"towel"    },
-    { id:"usb_diffuser_magnet_case",    name:'USB Diffuser (clear case, magnet closure)',           base:17.02, moq:25,  img:"mug"      },
-    { id:"tool_kit_26pc",               name:'26-Piece Deluxe Tool Kit',                            base:17.64, moq:40,  img:"pen"      },
-    { id:"utensil_set_bamboo_silicone", name:'5-Piece Bamboo & Silicone Utensil Set',               base:18.95, moq:50,  img:"notebook" },
-    { id:"finch_jar_wood_lid",          name:'Finch Jar with Wooden Lid',                           base:19.95, moq:72,  img:"mug"      },
-    { id:"cooler_backpack_mod",         name:'Mod Insulated Cooler Backpack',                       base:20.29, moq:50,  img:"towel"    },
-    { id:"candle_wixie_5oz",            name:'Wixie 5 oz Candle (with gift box)',                   base:20.63, moq:50,  img:"mug"      },
-    { id:"tool_set_alton_22pc",         name:'Alton 22-Piece Tool Set',                             base:20.99, moq:25,  img:"pen"      },
-    { id:"knife_peeler_ceramic_set",    name:'Top Choice Ceramic Knife & Peeler Set',               base:21.10, moq:20,  img:"notebook" },
-    { id:"wine_tools_bamboo_4pc",       name:'4-Piece Bamboo Wine Tool Set',                        base:21.49, moq:50,  img:"notebook" },
-    { id:"tumbler_pinnacle_40oz",       name:'Pinnacle 40 oz Vacuum Insulated Tumbler w/ Straw',    base:21.53, moq:24,  img:"mug"      },
-    { id:"chefs_companion_kit",         name:"Chef's Companion Kit",                                base:21.69, moq:50,  img:"notebook" },
-    { id:"humidifier_aroma_lightup",    name:'Aroma Light-Up Humidifier',                           base:21.99, moq:50,  img:"mug"      },
-    { id:"easy_kitchen_apple_master",   name:'Easy Kitchen Gift Set – The Apple Master',            base:21.99, moq:25,  img:"notebook" },
-    { id:"hypergear_multi_plug_5",      name:'HyperGear Multi Plug 5 (USB-C + USB)',                base:22.99, moq:24,  img:"pen"      },
-    { id:"indoor_pillow_16",            name:'Indoor Pillow 16"×16"',                               base:23.47, moq:48,  img:"towel"    },
-    { id:"plush_blanket_50x60",         name:'Micro Fleece Plush Blanket 50"×60"',                  base:24.38, moq:25,  img:"towel"    },
-    { id:"cube_power_strip",            name:'HyperGear CUBE Multi-Port Power Strip (cord)',        base:26.99, moq:24,  img:"pen"      },
-    { id:"rabbit_garnish_tool",         name:'rabbit® Cocktail Garnish Tool',                       base:27.50, moq:48,  img:"pen"      },
-    { id:"bbq_grilling_mitt_kit",       name:'BBQ Grilling Mitt Kit (with tools)',                  base:28.33, moq:25,  img:"notebook" },
-    { id:"lex_bamboo_speaker_charger",  name:'Lex Bamboo Speaker + 5W Phone Charger',               base:29.25, moq:50,  img:"pen"      },
-    { id:"ilive_magnetic_speaker",      name:'iLive™ Water-Resistant Magnetic Speaker',             base:32.40, moq:20,  img:"pen"      },
-    { id:"satechi_findall_keychain",    name:'SATECHI® FindAll™ Keychain (Apple Find My)',          base:33.75, moq:1,   img:"pen"      },
-    { id:"friz_cooler_bag",             name:'Heavy-Duty Friz Cooler Bag',                          base:36.30, moq:48,  img:"towel"    },
-    { id:"crossroad_emergency_kit",     name:'Crossroad Emergency Road Kit',                        base:36.72, moq:10,  img:"pen"      },
-    { id:"growler_64oz_beast",          name:'64 oz “The Beast” Stainless Growler',                 base:36.85, moq:24,  img:"mug"      },
-    { id:"desk_lamp_linear_black",      name:'Modern Office Desk Lamp (Linear)',                    base:36.98, moq:12,  img:"pen"      },
-    { id:"urban_peak_cooler_12can",     name:'Urban Peak Waterproof 12-Can Hinge Cooler',           base:37.59, moq:12,  img:"towel"    },
-    { id:"sound_shine_lamp_bt",         name:'Sound Shine Desk Lamp + Bluetooth Speaker + Qi',      base:37.78, moq:15,  img:"pen"      },
-    { id:"myrnam_cooler_backpack",      name:'Myrnam Cooler Backpack',                              base:37.95, moq:35,  img:"towel"    },
-    { id:"riverbend_cooler_chair",      name:'Riverbend Foldable Cooler Backpack & Chair',          base:38.99, moq:12,  img:"towel"    },
-    { id:"mini_maglite_2aa",            name:'Mini Maglite® 2 “AA” Flashlight',                     base:26.58, moq:36,  img:"pen"      },
-    { id:"power_pulse_handheld_vac",    name:'Power Pulse Rechargeable Handheld Vacuum',            base:36.29, moq:25,  img:"towel"    },
-    { id:"chess_board_wine_set",        name:'Chess Board & Wine Tool Set',                         base:20.00, moq:36,  img:"notebook" },
-    { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12,  img:"pen"      },
-
-    // ----- NEW ITEMS (all priced w/ MOQ) -----
-    { id:"tea_towel_rpet",              name:'Sublimated RPET Tea Towel',                           base:5.15,  moq:100, img:"towel"    },
-    { id:"pizza_cutter_mammamia",       name:'Mamma Mia Pizza Cutter',                              base:4.56,  moq:100, img:"pen"      },
-    { id:"coaster_marble_octagon",      name:'Marble Octagon Coaster',                              base:6.83,  moq:50,  img:"notebook" },
-    { id:"potholder_heavy",             name:'Heavy-Duty Potholder',                                base:6.22,  moq:100, img:"towel"    },
-    { id:"silicone_ice_cube_maker",     name:'Silicone Ice Cube Maker & Bucket',                    base:8.83,  moq:75,  img:"towel"    },
-    { id:"icecream_pint_cooler",        name:'American-Made Full Color Ice Cream Pint Cooler',      base:5.68,  moq:250, img:"towel"    },
-    { id:"workit_gloves",               name:'Workit All Purpose Gloves',                           base:8.35,  moq:50,  img:"pen"      },
-    { id:"teak_spoon_holder",           name:'Noble Teak Wood Spoon Holder',                        base:6.11,  moq:75,  img:"notebook" },
-    { id:"foam_handle_ice_scraper",     name:'Foam Handle Ice Scraper',                             base:3.70,  moq:100, img:"pen"      },
-    { id:"cargo_org_with_cooler",       name:'Cargo Organizer with Cooler',                         base:16.69, moq:40,  img:"box"      },
-    { id:"snowbrush_super_deluxe",      name:'Super Deluxe Snowbrush Ice Scraper',                  base:8.27,  moq:50,  img:"pen"      },
-    { id:"car_caddy",                   name:'Car Caddy',                                           base:3.77,  moq:100, img:"box"      },
-    { id:"fleece_roll_blanket",         name:'Fleece Roll Up Blanket',                              base:10.49, moq:75,  img:"towel"    },
-    { id:"oceanside_keychain_blue",     name:'Oceanside Leather Key Chain — Blue',                  base:5.13,  moq:250, img:"pen"      },
-
-    // ----- Hank’s Good/Better/Best specific new SKUs -----
-    { id:"yacht_club_boat_tote",        name:'Yacht Club Boat Tote — 20.5" × 13" × 6.7"',           base:13.98, moq:25,  img:"box"      },
-    { id:"ceramic_bowl_candle_16oz",    name:'16 oz Ceramic Bowl Candle',                           base:24.00, moq:48,  img:"mug"      },
-    { id:"coaster_slate_square",        name:'Square Slate Coaster',                                base:5.18,  moq:50,  img:"notebook" },
-    { id:"marshalls_tool_set",          name:'Marshalls Tool Set',                                  base:16.37, moq:25,  img:"pen"      },
-    { id:"nbn_whitby_24can_cooler",     name:'NBN Whitby 24-Can Backpack Cooler',                   base:37.15, moq:24,  img:"towel"    },
-    { id:"headlamp_starlight",          name:'Best Buddy Tools® Starlight Rechargeable LED Headlamp', base:11.31, moq:30, img:"pen"      },
-    { id:"flux_wall_charger_holder",    name:'Flux Wall Charger & Phone Holder (Type-C, USB & AC)', base:14.90, moq:30,  img:"pen"      },
-    { id:"stark_2_bluetooth_speaker",   name:'Stark 2.0 Bluetooth® Speaker',                        base:21.40, moq:50,  img:"pen"      },
+  // ---------- CATALOG ----------
+  // Keep ALL your original items here (unchanged)
+  const CATALOG_BASE = [
+    { id:"cutting_board_two_tone",      name:'11" Two-Tone Cutting Board',                          base:8.67,  moq:48  },
+    { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20  },
+    { id:"tumbler_oasis_20oz",          name:'Oasis-II 20 oz Stainless Tumbler',                    base:9.60,  moq:36  },
+    { id:"vacuum_dynamo_portable",      name:'Dynamo Rechargeable Portable Vacuum',                 base:10.70, moq:40  },
+    { id:"trunk_organizer_expandable",  name:'Expandable Trunk Organizer',                          base:11.45, moq:50  },
+    { id:"box_corrugated_large_black",  name:'Black Corrugated Large Box',                          base:11.81, moq:100 },
+    { id:"screwdriver_artisan_20pc",    name:'Best Buddy Tools® Artisan Screwdriver Set (20-pc)',   base:12.25, moq:30  },
+    { id:"cooler_lunch_ultimate",       name:'Ultimate Lunch Bag Cooler',                           base:12.49, moq:100 },
+    { id:"camp_mug_14oz",               name:'14 oz Powder-Coated Camping Mug',                     base:15.95, moq:48  },
+    { id:"car_wash_pit_crew",           name:'Pit Crew 9-Piece Car Wash Detailing Kit',             base:16.67, moq:25  },
+    { id:"usb_diffuser_magnet_case",    name:'USB Diffuser (clear case, magnet closure)',           base:17.02, moq:25  },
+    { id:"tool_kit_26pc",               name:'26-Piece Deluxe Tool Kit',                            base:17.64, moq:40  },
+    { id:"utensil_set_bamboo_silicone", name:'5-Piece Bamboo & Silicone Utensil Set',               base:18.95, moq:50  },
+    { id:"finch_jar_wood_lid",          name:'Finch Jar with Wooden Lid',                           base:19.95, moq:72  },
+    { id:"cooler_backpack_mod",         name:'Mod Insulated Cooler Backpack',                       base:20.29, moq:50  },
+    { id:"candle_wixie_5oz",            name:'Wixie 5 oz Candle (with gift box)',                   base:20.63, moq:50  },
+    { id:"tool_set_alton_22pc",         name:'Alton 22-Piece Tool Set',                             base:20.99, moq:25  },
+    { id:"knife_peeler_ceramic_set",    name:'Top Choice Ceramic Knife & Peeler Set',               base:21.10, moq:20  },
+    { id:"wine_tools_bamboo_4pc",       name:'4-Piece Bamboo Wine Tool Set',                        base:21.49, moq:50  },
+    { id:"tumbler_pinnacle_40oz",       name:'Pinnacle 40 oz Vacuum Insulated Tumbler w/ Straw',    base:21.53, moq:24  },
+    { id:"chefs_companion_kit",         name:"Chef's Companion Kit",                                base:21.69, moq:50  },
+    { id:"humidifier_aroma_lightup",    name:'Aroma Light-Up Humidifier',                           base:21.99, moq:50  },
+    { id:"easy_kitchen_apple_master",   name:'Easy Kitchen Gift Set – The Apple Master',            base:21.99, moq:25  },
+    { id:"hypergear_multi_plug_5",      name:'HyperGear Multi Plug 5 (USB-C + USB)',                base:22.99, moq:24  },
+    { id:"indoor_pillow_16",            name:'Indoor Pillow 16"×16"',                               base:23.47, moq:48  },
+    { id:"plush_blanket_50x60",         name:'Micro Fleece Plush Blanket 50"×60"',                  base:24.38, moq:25  },
+    { id:"cube_power_strip",            name:'HyperGear CUBE Multi-Port Power Strip (cord)',        base:26.99, moq:24  },
+    { id:"rabbit_garnish_tool",         name:'rabbit® Cocktail Garnish Tool',                       base:27.50, moq:48  },
+    { id:"bbq_grilling_mitt_kit",       name:'BBQ Grilling Mitt Kit (with tools)',                  base:28.33, moq:25  },
+    { id:"lex_bamboo_speaker_charger",  name:'Lex Bamboo Speaker + 5W Phone Charger',               base:29.25, moq:50  },
+    { id:"ilive_magnetic_speaker",      name:'iLive™ Water-Resistant Magnetic Speaker',             base:32.40, moq:20  },
+    { id:"satechi_findall_keychain",    name:'SATECHI® FindAll™ Keychain (Apple Find My)',          base:33.75, moq:1   },
+    { id:"friz_cooler_bag",             name:'Heavy-Duty Friz Cooler Bag',                          base:36.30, moq:48  },
+    { id:"crossroad_emergency_kit",     name:'Crossroad Emergency Road Kit',                        base:36.72, moq:10  },
+    { id:"growler_64oz_beast",          name:'64 oz “The Beast” Stainless Growler',                 base:36.85, moq:24  },
+    { id:"desk_lamp_linear_black",      name:'Modern Office Desk Lamp (Linear)',                    base:36.98, moq:12  },
+    { id:"urban_peak_cooler_12can",     name:'Urban Peak Waterproof 12-Can Hinge Cooler',           base:37.59, moq:12  },
+    { id:"sound_shine_lamp_bt",         name:'Sound Shine Desk Lamp + Bluetooth Speaker + Qi',      base:37.78, moq:15  },
+    { id:"myrnam_cooler_backpack",      name:'Myrnam Cooler Backpack',                              base:37.95, moq:35  },
+    { id:"riverbend_cooler_chair",      name:'Riverbend Foldable Cooler Backpack & Chair',          base:38.99, moq:12  },
+    { id:"mini_maglite_2aa",            name:'Mini Maglite® 2 “AA” Flashlight',                     base:26.58, moq:36  },
+    { id:"power_pulse_handheld_vac",    name:'Power Pulse Rechargeable Handheld Vacuum',            base:36.29, moq:25  },
+    { id:"chess_board_wine_set",        name:'Chess Board & Wine Tool Set',                         base:20.00, moq:36  },
+    { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12  }
   ];
 
-  // Sort catalog by price asc (tie-breaker: name)
-  const CATALOG = [...CATALOG_RAW].sort((a,b)=>{
-    if (a.base !== b.base) return a.base - b.base;
-    return a.name.localeCompare(b.name);
-  });
+  // New items to ADD (MOQ pricing) — no duplicates with BASE
+  const CATALOG_ADDITIONS = [
+    { id:"tea_towel_rpet",              name:"Sublimated RPET Tea Towel",                           base:5.15,  moq:100 },
+    { id:"pizza_cutter_mammamia",       name:"Mamma Mia Pizza Cutter",                              base:4.56,  moq:100 },
+    { id:"coaster_marble_octagon",      name:"Marble Octagon Coaster",                              base:6.83,  moq:50  },
+    { id:"potholder_heavy",             name:"Heavy-Duty Potholder",                                base:6.22,  moq:100 },
+    { id:"silicone_ice_cube_maker",     name:"Silicone Ice Cube Maker & Bucket",                    base:8.83,  moq:75  },
+    { id:"icecream_pint_cooler",        name:"American-Made Full Color Ice Cream Pint Cooler",      base:5.68,  moq:250 },
+    { id:"workit_gloves",               name:"Workit All Purpose Gloves",                           base:8.35,  moq:50  },
+    { id:"teak_spoon_holder",           name:"Noble Teak Wood Spoon Holder",                        base:6.11,  moq:75  },
+    { id:"foam_handle_ice_scraper",     name:"Foam Handle Ice Scraper",                             base:3.70,  moq:100 },
+    { id:"cargo_org_with_cooler",       name:"Cargo Organizer with Cooler",                         base:16.69, moq:40  },
+    { id:"snowbrush_super_deluxe",      name:"Super Deluxe Snowbrush Ice Scraper",                  base:8.27,  moq:50  },
+    { id:"car_caddy",                   name:"Car Caddy",                                           base:3.77,  moq:100 },
+    { id:"fleece_roll_blanket",         name:"Fleece Roll Up Blanket",                              base:10.49, moq:75  },
+    { id:"oceanside_keychain_blue",     name:"Oceanside Leather Key Chain — Blue",                  base:5.13,  moq:250 },
 
-  // ---------- Pre-Built Sets (updated) ----------
+    // Hank’s Good/Better/Best new pieces
+    { id:"yacht_club_boat_tote",        name:"Yacht Club Boat Tote — 20.5\" × 13\" × 6.7\"",        base:13.98, moq:25  },
+    { id:"ceramic_bowl_candle_16oz",    name:"16 oz Ceramic Bowl Candle",                           base:24.00, moq:48  },
+    { id:"coaster_slate_square",        name:"Square Slate Coaster",                                base:5.18,  moq:50  },
+    { id:"marshalls_tool_set",          name:"Marshalls Tool Set (18-pc)",                          base:16.37, moq:25  },
+    { id:"nbn_whitby_24can_cooler",     name:"NBN Whitby 24-Can Backpack Cooler",                   base:37.15, moq:24  },
+    { id:"headlamp_starlight",          name:"Best Buddy Tools® Starlight Rechargeable LED Headlamp",base:11.31, moq:30 },
+    { id:"flux_wall_charger_holder",    name:"Flux Wall Charger & Phone Holder (Type-C, USB & AC)", base:14.90, moq:30  },
+    { id:"stark_2_bluetooth_speaker",   name:"Stark 2.0 Bluetooth® Speaker",                        base:21.40, moq:50  }
+  ];
+
+  // Final catalog used by the app
+  const CATALOG = [...CATALOG_BASE, ...CATALOG_ADDITIONS];
+
+  // Pre-built sets
   const RECOMMENDED_SETS = [
-    // Good (3)
     { id:'good',   label:'Good',   thumb:'reco_good',
       items:['gift_box_magnetic_15x12','tumbler_oasis_20oz','cutting_board_two_tone'] },
-    // Better (4)
     { id:'better', label:'Better', thumb:'reco_better',
       items:['yacht_club_boat_tote','ceramic_bowl_candle_16oz','coaster_slate_square','marshalls_tool_set'] },
-    // Best (5)
     { id:'best',   label:'Best',   thumb:'reco_best',
       items:['nbn_whitby_24can_cooler','headlamp_starlight','camp_mug_14oz','flux_wall_charger_holder','stark_2_bluetooth_speaker'] },
   ];
@@ -226,26 +219,24 @@
       );
     }
 
-    // Preview grid
     const previewColsClass = tier.slots === 4 ? 'grid-cols-2' : 'grid-cols-3';
     const centerGrid       = tier.slots === 4 ? '' : 'place-content-center';
 
     async function submit(){
       setError('');
-      if(!email){ setError('Please enter a contact email.'); return; }
+      if(!name.trim()){ setError('Please enter your First & Last Name.'); return; }
+      if(!email.trim()){ setError('Please enter a contact email.'); return; }
+      if(selected.length === 0){ setError('Please select at least one item.'); return; }
+
       setSending(true);
 
       const payload = {
         admin: ADMIN_EMAIL,
         site: SITE_NAME,
-        name,
-        division,
-        email,
-        phone,
+        submittedAt: new Date().toISOString(),
+        name, division, email, phone,
         tier: { id:tier.id, name:tier.name, slots:tier.slots, pack:tier.pack },
-        qty,
-        priceEach,
-        total,
+        qty, priceEach, total,
         items: selected.map(id => {
           const i = CATALOG.find(x=>x.id===id)||{};
           return { id, name:i.name || id, moq:i.moq || 1, unitPrice:i.base };
@@ -271,7 +262,7 @@
 
     // ---------- UI ----------
     return React.createElement('div', null,
-      // Header bar
+      // Header
       React.createElement('header',{className:'sticky top-0 z-30 bg-[var(--drh-navy)] text-white'},
         React.createElement('div',{className:'max-w-6xl mx-auto px-4 py-4 flex items-center justify-between'},
           React.createElement('a',{ href: '../', className:'flex items-center' },
@@ -290,10 +281,10 @@
         )
       ),
 
-      // Main grid
+      // Main
       React.createElement('main',{className:'max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-5 gap-6'},
 
-        // Hank’s Pre-Built Sets
+        // Pre-built sets
         React.createElement('div', { className:'lg:col-span-5' },
           React.createElement('h2', { className:'text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center mb-4' }, "Hank’s Pre-Built Sets"),
           React.createElement('div', { className:'max-w-5xl mx-auto grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4' },
@@ -302,10 +293,10 @@
           React.createElement('h2', { className:'mt-4 text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center' }, 'Create Your Own Kit')
         ),
 
-        // Left column: Select Kit + Select Items
+        // Left column
         React.createElement('section',{className:'lg:col-span-3 space-y-6'},
 
-          // 1) Select Kit
+          // 1) Select kit
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
             React.createElement('div',{className:'flex items-start justify-between'},
               React.createElement('div',null,
@@ -327,7 +318,7 @@
               ))
             ),
             React.createElement('div',{className:'mt-4 grid sm:grid-cols-3 gap-3'},
-              React.createElement('label',{className:'block'},
+              React.createElement('label',{className:'block col-span-3 sm:col-span-1'},
                 React.createElement('span',{className:'text-xs text-slate-500'},'Division'),
                 React.createElement('input',{value:division,placeholder:'e.g., North Dallas',onChange:e=>setDivision(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2'})
               ),
@@ -344,39 +335,42 @@
             )
           ),
 
-          // 2) Select Items (sorted by price asc)
+          // 2) Select items — sorted by price
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
             React.createElement('h2',{className:'text-lg font-semibold'},'2) Select Items'),
             React.createElement('p',{className:'text-sm text-slate-500'},'Sorted by price (lowest to highest).'),
             React.createElement('div',{className:'mt-4 max-h-[60vh] overflow-y-auto pr-1'},
               React.createElement('div',{className:'grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
-                CATALOG.map(item => {
-                  const active   = selected.includes(item.id);
-                  const disabled = !active && selected.length >= tier.slots;
-                  return React.createElement('button',{
-                      key:item.id, onClick:()=>toggle(item.id),
-                      className:`group rounded-2xl border p-4 text-left transition ${active?'border-[var(--drh-navy)] ring-1 ring-[var(--drh-navy)] shadow':'border-slate-200 hover:shadow'} ${disabled?'opacity-40 pointer-events-none':''}`
-                    },
-                    React.createElement('div',{className:'relative'},
-                      React.createElement('div',{className:'aspect-[4/3] w-full rounded-xl bg-white flex items-center justify-center overflow-hidden'},
-                        React.createElement(ProductImage, { id:item.id, alt:item.name })
+                CATALOG
+                  .slice()
+                  .sort((a,b)=> a.base===b.base ? a.name.localeCompare(b.name) : a.base-b.base)
+                  .map(item => {
+                    const active   = selected.includes(item.id);
+                    const disabled = !active && selected.length >= tier.slots;
+                    return React.createElement('button',{
+                        key:item.id, onClick:()=>toggle(item.id),
+                        className:`group rounded-2xl border p-4 text-left transition ${active?'border-[var(--drh-navy)] ring-1 ring-[var(--drh-navy)] shadow':'border-slate-200 hover:shadow'} ${disabled?'opacity-40 pointer-events-none':''}`
+                      },
+                      React.createElement('div',{className:'relative'},
+                        React.createElement('div',{className:'aspect-[4/3] w-full rounded-xl bg-white flex items-center justify-center overflow-hidden'},
+                          React.createElement(ProductImage, { id:item.id, alt:item.name })
+                        ),
+                        active && React.createElement('span',{className:'absolute -top-2 -right-2 h-7 w-7 rounded-full bg-[var(--drh-navy)] text-white grid place-items-center'},'✔')
                       ),
-                      active && React.createElement('span',{className:'absolute -top-2 -right-2 h-7 w-7 rounded-full bg-[var(--drh-navy)] text-white grid place-items-center'},'✔')
-                    ),
-                    React.createElement('div',{className:'mt-3 font-medium'},item.name),
-                    React.createElement('div',{className:'mt-1 text-sm'},'$'+item.base.toFixed(2)),
-                    React.createElement('div',{className:'text-[11px] text-slate-500'},'MOQ ', item.moq || 1)
-                  );
-                })
+                      React.createElement('div',{className:'mt-3 font-medium'},item.name),
+                      React.createElement('div',{className:'mt-1 text-sm'},'$'+item.base.toFixed(2)),
+                      React.createElement('div',{className:'text-[11px] text-slate-500'},'MOQ ', item.moq || 1)
+                    );
+                  })
               )
             )
           )
         ),
 
-        // Right column: Box Preview + Summary
+        // Right column
         React.createElement('section',{className:'lg:col-span-2 space-y-6'},
 
-          // 3) Preview your full project
+          // 3) Preview
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
             React.createElement('h2',{className:'text-lg font-semibold'},'3) Preview your full project'),
             React.createElement('div',{className:'mt-4 aspect-square rounded-2xl bg-slate-100 p-4'},
@@ -400,19 +394,19 @@
             )
           ),
 
-          // 4) Summary
+          // 4) Summary + contact
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
             React.createElement('h2',{className:'text-lg font-semibold'},'4) Summary'),
             React.createElement('div',{className:'mt-2 space-y-2 text-sm'},
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Box Tier'),React.createElement('span',{className:'font-medium'},tier.name)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Items Selected'),React.createElement('span',{className:'font-medium'},selected.length,' / ',tier.slots)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Estimated Price / ea'),React.createElement('span',{className:'font-semibold'}, '$'+priceEach)),
-              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Order Quantity'),React.createElement('span',{className:'font-medium'},qty)),
+              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Order Qty'),React.createElement('span',{className:'font-medium'},qty)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Rough Total'),React.createElement('span',{className:'font-semibold'}, '$'+total))
             ),
             React.createElement('div',{className:'mt-4 grid gap-3'},
               React.createElement('label',{className:'block'},
-                React.createElement('span',{className:'text-xs text-slate-500'},'First & Last Name'),
+                React.createElement('span',{className:'text-xs text-slate-500'},'First & Last Name (required)'),
                 React.createElement('input',{type:'text',placeholder:'Your name',value:name,onChange:e=>setName(e.target.value),className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'})
               ),
               React.createElement('label',{className:'block'},
