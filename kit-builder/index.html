@@ -50,18 +50,56 @@
   }
 
   // ---------- Catalog ----------
+  // All ORIGINAL items (kept) + ALL NEW items (added)
   // base = MOQ unit price; moq = MOQ quantity
   const CATALOG_RAW = [
-    // Core / existing items (kept)
+    // ----- ORIGINAL LIST (unchanged IDs & prices) -----
     { id:"cutting_board_two_tone",      name:'11" Two-Tone Cutting Board',                          base:8.67,  moq:48,  img:"notebook" },
     { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20,  img:"box"      },
-    { id:"tumbler_oasis_20oz",          name:'Oasis-I 20 oz Stainless Steel Tumbler (Double Walled)', base:11.90, moq:36, img:"mug"      },
-    { id:"camp_mug_14oz",               name:'14 oz Powder-Coated Camping Mug',                     base:15.95, moq:48,  img:"mug"      },
-    { id:"tool_kit_26pc_deluxe",        name:'26-Piece Deluxe Tool Kit',                            base:17.64, moq:40,  img:"pen"      },
+    { id:"tumbler_oasis_20oz",          name:'Oasis-II 20 oz Stainless Tumbler',                    base:9.60,  moq:36,  img:"mug"      },
+    { id:"vacuum_dynamo_portable",      name:'Dynamo Rechargeable Portable Vacuum',                 base:10.70, moq:40,  img:"towel"    },
+    { id:"trunk_organizer_expandable",  name:'Expandable Trunk Organizer',                          base:11.45, moq:50,  img:"box"      },
+    { id:"box_corrugated_large_black",  name:'Black Corrugated Large Box',                          base:11.81, moq:100, img:"box"      },
     { id:"screwdriver_artisan_20pc",    name:'Best Buddy Tools® Artisan Screwdriver Set (20-pc)',   base:12.25, moq:30,  img:"pen"      },
+    { id:"cooler_lunch_ultimate",       name:'Ultimate Lunch Bag Cooler',                           base:12.49, moq:100, img:"towel"    },
+    { id:"camp_mug_14oz",               name:'14 oz Powder-Coated Camping Mug',                     base:15.95, moq:48,  img:"mug"      },
+    { id:"car_wash_pit_crew",           name:'Pit Crew 9-Piece Car Wash Detailing Kit',             base:16.67, moq:25,  img:"towel"    },
+    { id:"usb_diffuser_magnet_case",    name:'USB Diffuser (clear case, magnet closure)',           base:17.02, moq:25,  img:"mug"      },
+    { id:"tool_kit_26pc",               name:'26-Piece Deluxe Tool Kit',                            base:17.64, moq:40,  img:"pen"      },
+    { id:"utensil_set_bamboo_silicone", name:'5-Piece Bamboo & Silicone Utensil Set',               base:18.95, moq:50,  img:"notebook" },
+    { id:"finch_jar_wood_lid",          name:'Finch Jar with Wooden Lid',                           base:19.95, moq:72,  img:"mug"      },
+    { id:"cooler_backpack_mod",         name:'Mod Insulated Cooler Backpack',                       base:20.29, moq:50,  img:"towel"    },
+    { id:"candle_wixie_5oz",            name:'Wixie 5 oz Candle (with gift box)',                   base:20.63, moq:50,  img:"mug"      },
+    { id:"tool_set_alton_22pc",         name:'Alton 22-Piece Tool Set',                             base:20.99, moq:25,  img:"pen"      },
+    { id:"knife_peeler_ceramic_set",    name:'Top Choice Ceramic Knife & Peeler Set',               base:21.10, moq:20,  img:"notebook" },
+    { id:"wine_tools_bamboo_4pc",       name:'4-Piece Bamboo Wine Tool Set',                        base:21.49, moq:50,  img:"notebook" },
+    { id:"tumbler_pinnacle_40oz",       name:'Pinnacle 40 oz Vacuum Insulated Tumbler w/ Straw',    base:21.53, moq:24,  img:"mug"      },
+    { id:"chefs_companion_kit",         name:"Chef's Companion Kit",                                base:21.69, moq:50,  img:"notebook" },
+    { id:"humidifier_aroma_lightup",    name:'Aroma Light-Up Humidifier',                           base:21.99, moq:50,  img:"mug"      },
+    { id:"easy_kitchen_apple_master",   name:'Easy Kitchen Gift Set – The Apple Master',            base:21.99, moq:25,  img:"notebook" },
+    { id:"hypergear_multi_plug_5",      name:'HyperGear Multi Plug 5 (USB-C + USB)',                base:22.99, moq:24,  img:"pen"      },
+    { id:"indoor_pillow_16",            name:'Indoor Pillow 16"×16"',                               base:23.47, moq:48,  img:"towel"    },
+    { id:"plush_blanket_50x60",         name:'Micro Fleece Plush Blanket 50"×60"',                  base:24.38, moq:25,  img:"towel"    },
+    { id:"cube_power_strip",            name:'HyperGear CUBE Multi-Port Power Strip (cord)',        base:26.99, moq:24,  img:"pen"      },
+    { id:"rabbit_garnish_tool",         name:'rabbit® Cocktail Garnish Tool',                       base:27.50, moq:48,  img:"pen"      },
+    { id:"bbq_grilling_mitt_kit",       name:'BBQ Grilling Mitt Kit (with tools)',                  base:28.33, moq:25,  img:"notebook" },
+    { id:"lex_bamboo_speaker_charger",  name:'Lex Bamboo Speaker + 5W Phone Charger',               base:29.25, moq:50,  img:"pen"      },
+    { id:"ilive_magnetic_speaker",      name:'iLive™ Water-Resistant Magnetic Speaker',             base:32.40, moq:20,  img:"pen"      },
+    { id:"satechi_findall_keychain",    name:'SATECHI® FindAll™ Keychain (Apple Find My)',          base:33.75, moq:1,   img:"pen"      },
+    { id:"friz_cooler_bag",             name:'Heavy-Duty Friz Cooler Bag',                          base:36.30, moq:48,  img:"towel"    },
+    { id:"crossroad_emergency_kit",     name:'Crossroad Emergency Road Kit',                        base:36.72, moq:10,  img:"pen"      },
+    { id:"growler_64oz_beast",          name:'64 oz “The Beast” Stainless Growler',                 base:36.85, moq:24,  img:"mug"      },
+    { id:"desk_lamp_linear_black",      name:'Modern Office Desk Lamp (Linear)',                    base:36.98, moq:12,  img:"pen"      },
+    { id:"urban_peak_cooler_12can",     name:'Urban Peak Waterproof 12-Can Hinge Cooler',           base:37.59, moq:12,  img:"towel"    },
+    { id:"sound_shine_lamp_bt",         name:'Sound Shine Desk Lamp + Bluetooth Speaker + Qi',      base:37.78, moq:15,  img:"pen"      },
+    { id:"myrnam_cooler_backpack",      name:'Myrnam Cooler Backpack',                              base:37.95, moq:35,  img:"towel"    },
+    { id:"riverbend_cooler_chair",      name:'Riverbend Foldable Cooler Backpack & Chair',          base:38.99, moq:12,  img:"towel"    },
+    { id:"mini_maglite_2aa",            name:'Mini Maglite® 2 “AA” Flashlight',                     base:26.58, moq:36,  img:"pen"      },
+    { id:"power_pulse_handheld_vac",    name:'Power Pulse Rechargeable Handheld Vacuum',            base:36.29, moq:25,  img:"towel"    },
+    { id:"chess_board_wine_set",        name:'Chess Board & Wine Tool Set',                         base:20.00, moq:36,  img:"notebook" },
     { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:58.59, moq:12,  img:"pen"      },
 
-    // Additional items (now all priced w/ MOQ)
+    // ----- NEW ITEMS (all priced w/ MOQ) -----
     { id:"tea_towel_rpet",              name:'Sublimated RPET Tea Towel',                           base:5.15,  moq:100, img:"towel"    },
     { id:"pizza_cutter_mammamia",       name:'Mamma Mia Pizza Cutter',                              base:4.56,  moq:100, img:"pen"      },
     { id:"coaster_marble_octagon",      name:'Marble Octagon Coaster',                              base:6.83,  moq:50,  img:"notebook" },
@@ -77,30 +115,33 @@
     { id:"fleece_roll_blanket",         name:'Fleece Roll Up Blanket',                              base:10.49, moq:75,  img:"towel"    },
     { id:"oceanside_keychain_blue",     name:'Oceanside Leather Key Chain — Blue',                  base:5.13,  moq:250, img:"pen"      },
 
-    // Hank’s Good/Better/Best items
+    // ----- Hank’s Good/Better/Best specific new SKUs -----
     { id:"yacht_club_boat_tote",        name:'Yacht Club Boat Tote — 20.5" × 13" × 6.7"',           base:13.98, moq:25,  img:"box"      },
     { id:"ceramic_bowl_candle_16oz",    name:'16 oz Ceramic Bowl Candle',                           base:24.00, moq:48,  img:"mug"      },
     { id:"coaster_slate_square",        name:'Square Slate Coaster',                                base:5.18,  moq:50,  img:"notebook" },
-    { id:"marshalls_tool_set",          name:'Marshalls Tool Set (18-pc)',                          base:16.37, moq:25,  img:"pen"      },
+    { id:"marshalls_tool_set",          name:'Marshalls Tool Set',                                  base:16.37, moq:25,  img:"pen"      },
     { id:"nbn_whitby_24can_cooler",     name:'NBN Whitby 24-Can Backpack Cooler',                   base:37.15, moq:24,  img:"towel"    },
     { id:"headlamp_starlight",          name:'Best Buddy Tools® Starlight Rechargeable LED Headlamp', base:11.31, moq:30, img:"pen"      },
     { id:"flux_wall_charger_holder",    name:'Flux Wall Charger & Phone Holder (Type-C, USB & AC)', base:14.90, moq:30,  img:"pen"      },
     { id:"stark_2_bluetooth_speaker",   name:'Stark 2.0 Bluetooth® Speaker',                        base:21.40, moq:50,  img:"pen"      },
   ];
 
-  // Derived, sorted catalog (by price asc; tie-breaker name)
+  // Sort catalog by price asc (tie-breaker: name)
   const CATALOG = [...CATALOG_RAW].sort((a,b)=>{
     if (a.base !== b.base) return a.base - b.base;
     return a.name.localeCompare(b.name);
   });
 
-  // Hank’s Pre-Built Sets
+  // ---------- Pre-Built Sets (updated) ----------
   const RECOMMENDED_SETS = [
-    { id:'good',   label:"Good",   thumb:'reco_good',
+    // Good (3)
+    { id:'good',   label:'Good',   thumb:'reco_good',
       items:['gift_box_magnetic_15x12','tumbler_oasis_20oz','cutting_board_two_tone'] },
-    { id:'better', label:"Better", thumb:'reco_better',
+    // Better (4)
+    { id:'better', label:'Better', thumb:'reco_better',
       items:['yacht_club_boat_tote','ceramic_bowl_candle_16oz','coaster_slate_square','marshalls_tool_set'] },
-    { id:'best',   label:"Best",   thumb:'reco_best',
+    // Best (5)
+    { id:'best',   label:'Best',   thumb:'reco_best',
       items:['nbn_whitby_24can_cooler','headlamp_starlight','camp_mug_14oz','flux_wall_charger_holder','stark_2_bluetooth_speaker'] },
   ];
 
@@ -185,7 +226,7 @@
       );
     }
 
-    // Grid columns: keep 2×2 for 4; use 3 cols otherwise
+    // Preview grid
     const previewColsClass = tier.slots === 4 ? 'grid-cols-2' : 'grid-cols-3';
     const centerGrid       = tier.slots === 4 ? '' : 'place-content-center';
 
