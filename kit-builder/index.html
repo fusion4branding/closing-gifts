@@ -28,23 +28,21 @@
   const { useMemo, useState } = React;
 
   // ---------- Helpers ----------
-  function onlyDigits(s){ return (s || "").replace(/\D+/g, ""); }
+  const onlyDigits = s => (s || "").replace(/\D+/g, "");
   function formatPhone(s){
     const d = onlyDigits(s).slice(0,10);
-    const p1 = d.slice(0,3), p2 = d.slice(3,6), p3 = d.slice(6,10);
-    if(d.length <= 3) return p1;
-    if(d.length <= 6) return `(${p1}) ${p2}`;
-    return `(${p1}) ${p2}-${p3}`;
+    const a = d.slice(0,3), b = d.slice(3,6), c = d.slice(6,10);
+    if(d.length <= 3) return a;
+    if(d.length <= 6) return `(${a}) ${b}`;
+    return `(${a}) ${b}-${c}`;
   }
 
   // ---------- Icons & Images ----------
   function Icon({kind, className}) {
     const c = className || 'w-14 h-14 text-slate-400';
-    if(kind==='mug')      return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('rect',{x:28,y:28,width:56,height:64,rx:8,fill:'currentColor'}),React.createElement('rect',{x:84,y:40,width:16,height:28,rx:6,fill:'currentColor'}));
-    if(kind==='pen')      return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('path',{d:'M20 100l16 8 64-64-16-8z',fill:'currentColor'}),React.createElement('rect',{x:86,y:26,width:16,height:16,fill:'currentColor'}));
-    if(kind==='towel')    return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('path',{d:'M32 24h56v80H32z',fill:'currentColor'}),React.createElement('path',{d:'M32 44h56',stroke:'currentColor','strokeWidth':6}));
-    if(kind==='notebook') return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('rect',{x:30,y:18,width:56,height:92,rx:6,fill:'currentColor'}),React.createElement('rect',{x:38,y:30,width:32,height:6,fill:'currentColor'}));
-    if(kind==='box')      return React.createElement('svg',{viewBox:'0 0 128 128',className:c},React.createElement('path',{d:'M16 40l48-16 48 16-48 16z',fill:'currentColor'}),React.createElement('path',{d:'M24 44v44l40 16V60zM104 44v44L64 104V60z',fill:'currentColor'}));
+    if(kind==='box') return React.createElement('svg',{viewBox:'0 0 128 128',className:c},
+      React.createElement('path',{d:'M16 40l48-16 48 16-48 16z',fill:'currentColor'}),
+      React.createElement('path',{d:'M24 44v44l40 16V60zM104 44v44L64 104V60z',fill:'currentColor'}));
     return React.createElement('div',{className:'w-14 h-14 rounded-lg bg-slate-300'});
   }
 
@@ -59,7 +57,7 @@
     });
   }
 
-  // ---------- CATALOG ----------
+  // ---------- CATALOG (master) ----------
   const CATALOG_BASE = [
     { id:"cutting_board_two_tone",      name:'11" Two-Tone Cutting Board',                          base:8.67,  moq:48  },
     { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20  },
@@ -124,7 +122,7 @@
     { id:"oceanside_keychain_blue",     name:"Oceanside Leather Key Chain — Blue",                  base:5.13,  moq:250 },
     { id:"yacht_club_boat_tote",        name:"Yacht Club Boat Tote — 20.5\" × 13\" × 6.7\"",        base:13.98, moq:25  },
     { id:"ceramic_bowl_candle_16oz",    name:"16 oz Ceramic Bowl Candle",                           base:24.00, moq:48  },
-    { id:"coaster_slate_square",        name:"Square Slate Coaster",                                base:5.18, moq:50  },
+    { id:"coaster_slate_square",        name:"Square Slate Coaster",                                base:5.18,  moq:50  },
     { id:"marshalls_tool_set",          name:"Marshalls Tool Set (18-pc)",                          base:16.37, moq:25  },
     { id:"nbn_whitby_24can_cooler",     name:"NBN Whitby 24-Can Backpack Cooler",                   base:37.15, moq:24  },
     { id:"headlamp_starlight",          name:"Best Buddy Tools® Starlight Rechargeable LED Headlamp",base:11.31, moq:30 },
@@ -133,6 +131,16 @@
   ];
 
   const CATALOG = [...CATALOG_BASE, ...CATALOG_ADDITIONS];
+
+  // Exclude boxes/bags from "3) Select Items"
+  const EXCLUDE_ITEM_IDS = new Set([
+    'gift_box_magnetic_15x12', 'box_corrugated_large_black',
+    'nbn_whitby_24can_cooler', 'yacht_club_boat_tote',
+    'friz_cooler_bag', 'urban_peak_cooler_12can', 'myrnam_cooler_backpack',
+    'cooler_backpack_mod',
+    'icool_vail_24can_cooler_bag' // keep excluded if you add this image id
+  ]);
+  const ITEMS_FOR_PICKER = CATALOG.filter(it => !EXCLUDE_ITEM_IDS.has(it.id));
 
   // Pre-built sets
   const RECOMMENDED_SETS = [
@@ -144,64 +152,35 @@
       items:['nbn_whitby_24can_cooler','headlamp_starlight','camp_mug_14oz','flux_wall_charger_holder','stark_2_bluetooth_speaker'] },
   ];
 
-  // Short display names for pre-built set bullets
   const SHORT_LABELS = {
-    // Good
-    gift_box_magnetic_15x12: "Gift Box",
-    tumbler_oasis_20oz: "20 oz Tumbler",
-    cutting_board_two_tone: "Cutting Board",
-    // Better
-    yacht_club_boat_tote: "Tote",
-    ceramic_bowl_candle_16oz: "Bowl Candle",
-    coaster_slate_square: "Coaster Slate",
-    marshalls_tool_set: "Tool Set",
-    // Best
-    nbn_whitby_24can_cooler: "24-Can Cooler",
-    headlamp_starlight: "Headlamp",
-    camp_mug_14oz: "14 oz Mug",
-    flux_wall_charger_holder: "Wall Charger",
-    stark_2_bluetooth_speaker: "BT Speaker",
+    gift_box_magnetic_15x12:"Gift Box", tumbler_oasis_20oz:"20 oz Tumbler", cutting_board_two_tone:"Cutting Board",
+    yacht_club_boat_tote:"Tote", ceramic_bowl_candle_16oz:"Bowl Candle", coaster_slate_square:"Coaster Slate", marshalls_tool_set:"Tool Set",
+    nbn_whitby_24can_cooler:"24-Can Cooler", headlamp_starlight:"Headlamp", camp_mug_14oz:"14 oz Mug", flux_wall_charger_holder:"Wall Charger", stark_2_bluetooth_speaker:"BT Speaker",
   };
 
   const BOX_TIERS = [
-    {
-      id: "starter",
-      name: "Starter Kit",
-      slots: 3,
-      pack: 4.00,
-      desc: "3 custom branded items + custom packaging (gift box or bag)"
-    },
-    {
-      id: "standard",
-      name: "Standard Kit",
-      slots: 4,
-      pack: 6.00,
-      desc: "4 custom branded items + custom gift box (gift box or bag)"
-    },
-    {
-      id: "premium",
-      name: "Premium Kit",
-      slots: 5,
-      pack: 9.00,
-      desc: "5 custom branded items + custom gift box (gift box or bag)"
-    },
+    { id:"starter",  name:"Starter Kit",  slots:3, pack:4.00, desc:"3 custom branded items + custom packaging (gift box or bag)" },
+    { id:"standard", name:"Standard Kit", slots:4, pack:6.00, desc:"4 custom branded items + custom gift box (gift box or bag)" },
+    { id:"premium",  name:"Premium Kit",  slots:5, pack:9.00, desc:"5 custom branded items + custom gift box (gift box or bag)" },
   ];
 
-  // Packaging placeholders (single select)
+  // 2) Select Packaging — use SAME image file names as in Items (id = image id), + show SKU
   const PACKAGING = [
-    { id:'pack_box_a', name:'Mailing Box A (placeholder)', icon:'box' },
-    { id:'pack_box_b', name:'Mailing Box B (placeholder)', icon:'box' },
-    { id:'pack_box_c', name:'Gift Box A (placeholder)',    icon:'box' },
-    { id:'pack_box_d', name:'Gift Box B (placeholder)',    icon:'box' },
-    { id:'pack_box_e', name:'Tote Bag (placeholder)',      icon:'box' },
-    { id:'pack_box_f', name:'Rigid Mailer (placeholder)',  icon:'box' },
+    { id:'gift_box_magnetic_15x12',     sku:'0BOXLARGE',  name:'15" W × 12" Magnetic Closure Gift Box' },
+    // If you have a separate 12×10.5 image id, replace gift_box_magnetic_15x12 with that id:
+    { id:'gift_box_magnetic_15x12',     sku:'0BOXMEDIUM', name:'12" W × 10 ½" Magnetic Closure Gift Box' },
+    { id:'box_corrugated_large_black',  sku:'GL2015-18',  name:'Brown Corrugated Large Box' },
+    { id:'nbn_whitby_24can_cooler',     sku:'3950-04',    name:'NBN Whitby 24 Can Backpack Cooler' },
+    { id:'yacht_club_boat_tote',        sku:'QSB141',     name:'Yacht Club Large Boat Tote — 24" × 14.17" × 6.7"' },
+    // Add your iCOOL image to /img with this id if you have it already. Otherwise swap to a close existing cooler id.
+    { id:'icool_vail_24can_cooler_bag', sku:'GR4442',     name:'iCOOL Vail 24-Can Cooler Bag' },
   ];
 
   // ---------- App ----------
   function App(){
     const [tier,setTier]           = useState(BOX_TIERS[1]);
     const [selected,setSelected]   = useState([]);
-    const [selectedPack,setPack]   = useState(null); // single select
+    const [selectedPack,setPack]   = useState(null); // store index or id; we’ll store packaging.id (image id)
     const [qty,setQty]             = useState(150);
     const [division,setDivision]   = useState('');
     const [name,setName]           = useState('');
@@ -212,7 +191,6 @@
 
     const remaining = tier.slots - selected.length;
 
-    // Estimate per ea — items only (no tier pack fee)
     const priceEach = useMemo(()=>{
       const items = selected.map(id => CATALOG.find(i=>i.id===id));
       const itemSum = items.reduce((s,i)=> s + (i?.base ?? 0), 0);
@@ -221,9 +199,8 @@
 
     function toggle(id){
       setSelected(prev =>
-        prev.includes(id)
-          ? prev.filter(x => x !== id)
-          : (prev.length < tier.slots ? [...prev, id] : prev)
+        prev.includes(id) ? prev.filter(x => x !== id)
+                          : (prev.length < tier.slots ? [...prev, id] : prev)
       );
     }
 
@@ -236,7 +213,7 @@
 
     function onTierClick(b){
       setTier(b);
-      setSelected([]); // clear when switching tiers
+      setSelected([]);
     }
 
     function SetCard({ set }) {
@@ -256,30 +233,19 @@
            ${active ? 'border-[var(--drh-navy)] ring-2 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow-md'}`
       },
         React.createElement('div', { className:'grid grid-cols-[auto_1fr] gap-5 items-start' },
-
-          // LEFT column
           React.createElement('div', { className:'flex items-center gap-4 min-w-0' },
-            React.createElement('div', {
-              className:'h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white ring-1 ring-slate-200 grid place-items-center overflow-hidden shrink-0'
-            },
-              thumbId
-                ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set' })
-                : React.createElement(Icon, { kind:'box', className:'w-full h-full text-slate-400' })
+            React.createElement('div', { className:'h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white ring-1 ring-slate-200 grid place-items-center overflow-hidden shrink-0' },
+              thumbId ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set' })
+                      : React.createElement(Icon, { kind:'box', className:'w-full h-full text-slate-400' })
             ),
             React.createElement('div', { className:'min-w-0' },
               React.createElement('div', { className:'text-lg md:text-xl font-semibold leading-tight' }, set.label),
               React.createElement('div', { className:'text-xs text-slate-500' }, `${set.items.length} items`)
             )
           ),
-
-          // RIGHT column: stacked list (never clipped)
-          React.createElement('div', { className:'min-w-0' },
-            React.createElement('ul', {
-              className:'list-disc pl-5 text-[12px] leading-5 text-slate-700 space-y-0.5'
-            },
-              shortItems.map((label, idx) =>
-                React.createElement('li', { key: set.id + '-li-' + idx }, label)
-              )
+          React.createElement('ul', { className:'list-disc pl-5 text-[12px] leading-5 text-slate-700 space-y-0.5' },
+            shortItems.map((label, idx) =>
+              React.createElement('li', { key: set.id + '-li-' + idx }, label)
             )
           )
         )
@@ -299,6 +265,8 @@
 
       setSending(true);
 
+      const packObj = PACKAGING.find(p=>p.id===selectedPack);
+
       const payload = {
         admin: ADMIN_EMAIL,
         site: SITE_NAME,
@@ -309,10 +277,10 @@
         phone: phone ? formatPhone(phone) : '',
         tier: { id:tier.id, name:tier.name, slots:tier.slots, pack:tier.pack },
         qty, priceEach,
-        packaging: selectedPack,
+        // Include both the display name and the SKU while using the SAME image id as Items
+        packaging: packObj ? { id: packObj.id, name: packObj.name, sku: packObj.sku } : null,
         items: selected.map(id => {
           const i = CATALOG.find(x=>x.id===id)||{};
-          // MOQ intentionally omitted
           return { id, name:i.name || id, unitPrice:i.base };
         }),
       };
@@ -423,10 +391,10 @@
             )
           ),
 
-          // 2) Select Packaging (single-select)
+          // 2) Select Packaging (single-select) — images reuse Items filenames
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
-            React.createElement('h2',{className:'text-lg font-semibold'},'2) Select Packaging'),
-            React.createElement('p',{className:'text-sm text-slate-500'},'Choose one packaging option (placeholder items — pricing to be confirmed).'),
+            React.createElement('h2',{className:'text-lg font-semibold'},'2) Select Packaging Option'),
+            React.createElement('p',{className:'text-sm text-slate-500'},'Choose one packaging option.'),
             React.createElement('div',{className:'mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
               PACKAGING.map(p => {
                 const active = selectedPack === p.id;
@@ -434,23 +402,24 @@
                   key:p.id, onClick:()=>setPack(prev => prev===p.id ? null : p.id),
                   className:`group rounded-2xl border p-4 text-left transition ${active?'border-[var(--drh-navy)] ring-1 ring-[var(--drh-navy)] shadow':'border-slate-200 hover:shadow'}`
                 },
-                  React.createElement('div',{className:'h-24 grid place-items-center'},
-                    React.createElement(Icon,{kind:p.icon,className:'w-16 h-16 text-slate-400'})
+                  React.createElement('div',{className:'aspect-[4/3] w-full rounded-xl bg-white grid place-items-center overflow-hidden'},
+                    React.createElement(ProductImage,{ id:p.id, alt:p.name })
                   ),
                   React.createElement('div',{className:'mt-2 font-medium'},p.name),
+                  React.createElement('div',{className:'text-xs text-slate-500 mt-0.5'},p.sku),
                   active && React.createElement('div',{className:'mt-1 text-xs text-emerald-700 font-medium'},'Selected')
                 );
               })
             )
           ),
 
-          // 3) Select items — sorted by price
+          // 3) Select items — boxes/bags removed
           React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
             React.createElement('h2',{className:'text-lg font-semibold'},'3) Select Items'),
             React.createElement('p',{className:'text-sm text-slate-500'},'Sorted by price (lowest to highest).'),
             React.createElement('div',{className:'mt-4 max-h-[60vh] overflow-y-auto pr-1'},
               React.createElement('div',{className:'grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
-                CATALOG
+                ITEMS_FOR_PICKER
                   .slice()
                   .sort((a,b)=> a.base===b.base ? a.name.localeCompare(b.name) : a.base-b.base)
                   .map(item => {
@@ -508,7 +477,17 @@
             React.createElement('div',{className:'mt-2 space-y-2 text-sm'},
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Box Tier'),React.createElement('span',{className:'font-medium'},tier.name)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Items Selected'),React.createElement('span',{className:'font-medium'},selected.length,' / ',tier.slots)),
-              React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Selected Packaging'),React.createElement('span',{className:'font-medium'},selectedPack ? PACKAGING.find(p=>p.id===selectedPack)?.name : 'None')),
+              React.createElement('div',{className:'flex items-center justify-between'},
+                React.createElement('span',null,'Selected Packaging'),
+                React.createElement('span',{className:'font-medium'},
+                  selectedPack
+                    ? (() => {
+                        const p = PACKAGING.find(x=>x.id===selectedPack);
+                        return p ? `${p.name} • ${p.sku}` : 'None';
+                      })()
+                    : 'None'
+                )
+              ),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Estimated Price / ea (items only)'),React.createElement('span',{className:'font-semibold'}, '$'+priceEach)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Flat Kitting Rate'),React.createElement('span',{className:'font-medium'},'$5.00')),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Order Qty'),React.createElement('span',{className:'font-medium'},qty))
@@ -528,9 +507,7 @@
               React.createElement('label',{className:'block'},
                 React.createElement('span',{className:'text-xs text-slate-500'},'Phone (optional)'),
                 React.createElement('input',{
-                  type:'tel',
-                  inputMode:'numeric',
-                  placeholder:'(555) 555-5555',
+                  type:'tel', inputMode:'numeric', placeholder:'(555) 555-5555',
                   value:phone,
                   onChange:e=>setPhone(formatPhone(e.target.value)),
                   onKeyDown:e=>{
