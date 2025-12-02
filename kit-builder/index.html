@@ -156,16 +156,17 @@ const ProductImage = React.memo(function ProductImage({ id, alt, className }) {
   ];
 
   // 2) Select Packaging — unique key for selection; imageId reuses your Items filenames
-  const PACKAGING = [
-  { key:'0BOXLARGE',  imageId:'gift_box_magnetic_15x12', name:'15" W × 12" Magnetic Closure Gift Box' },
-  { key:'15-17219',   imageId:'display_mailer_box_9_5x7_75x4', name:'Display Mailer Box 9.5" × 7.75" × 4"' },
-  { key:'GL2015-18',  imageId:'box_corrugated_large_black',  name:'Brown Corrugated Large Box' },
+const PACKAGING = [
+  { key:'0BOXLARGE',  imageId:'gift_box_magnetic_15x12',        name:'15" W × 12" Magnetic Closure Gift Box',         price:13.00 },
+  { key:'15-17219',   imageId:'display_mailer_box_9_5x7_75x4',  name:'Display Mailer Box 9.5" × 7.75" × 4"',          price:4.00  },
+  { key:'GL2015-18',  imageId:'box_corrugated_large_black',     name:'Brown Corrugated Large Box',                     price:5.99  },
 
-  // Bags (you showed them with packaging; we keep them here so they’re single-select):
-  { key:'CB185',      imageId:'urban_peak_mombo_backpack_cooler', name:'Urban Peak Waterproof Mombo Backpack/Cooler' },
-  { key:'3950-04',    imageId:'nbn_whitby_24can_cooler',          name:'NBN Whitby 24 Can Backpack Cooler' },
-  { key:'QSB141',     imageId:'yacht_club_boat_tote',             name:'Yacht Club Large Boat Tote – 24" × 14.17" × 6.7"' },
+  // Bags shown as single-select packaging as requested:
+  { key:'CB185',      imageId:'urban_peak_mombo_backpack_cooler', name:'Urban Peak Waterproof Mombo Backpack/Cooler',  price:55.00 },
+  { key:'3950-04',    imageId:'nbn_whitby_24can_cooler',          name:'NBN Whitby 24 Can Backpack Cooler',            price:30.00 },
+  { key:'QSB141',     imageId:'yacht_club_boat_tote',             name:'Yacht Club Large Boat Tote – 24" × 14.17" × 6.7"', price:17.00 }
 ];
+
 
       // ---------- Preview grid (memoized to avoid flicker while typing) ----------
 const PreviewGrid = React.memo(function PreviewGrid({ tierSlots, selected, catalog }) {
@@ -209,6 +210,45 @@ const PreviewGrid = React.memo(function PreviewGrid({ tierSlots, selected, catal
   );
 });
 
+      // ---------- Pre-built Set card (memoized & OUTSIDE App to prevent remounts) ----------
+const SetCard = React.memo(function SetCard({ setDef, selected, catalog, onChoose }) {
+  const first   = catalog.find(i => i.id === setDef.items[0]);
+  const thumbId = setDef.thumb || (first ? first.id : null);
+
+  const active = selected.length === setDef.items.length &&
+                 setDef.items.every(id => selected.includes(id));
+
+  const shortItems = setDef.items.map(
+    id => SHORT_LABELS[id] || (catalog.find(i=>i.id===id)?.name ?? id)
+  );
+
+  return React.createElement('button', {
+    onClick: () => onChoose(setDef),
+    className:
+      `group rounded-2xl border p-6 text-left transition bg-white w-full
+       ${active ? 'border-[var(--drh-navy)] ring-2 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow-md'}`
+  },
+    React.createElement('div', { className:'grid grid-cols-[auto_1fr] gap-5 items-start' },
+      React.createElement('div', { className:'flex items-center gap-4 min-w-0' },
+        React.createElement('div', { className:'h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white ring-1 ring-slate-200 grid place-items-center overflow-hidden shrink-0' },
+          thumbId
+            ? React.createElement(ProductImage, { id:thumbId, alt:setDef.label+' set' })
+            : React.createElement('div',{className:'w-14 h-14 rounded-lg bg-slate-300'})
+        ),
+        React.createElement('div', { className:'min-w-0' },
+          React.createElement('div', { className:'text-lg md:text-xl font-semibold leading-tight' }, setDef.label),
+          React.createElement('div', { className:'text-xs text-slate-500' }, `${setDef.items.length} items`)
+        )
+      ),
+      React.createElement('ul', { className:'list-disc pl-5 text-[12px] leading-5 text-slate-700 space-y-0.5' },
+        shortItems.map((label, idx) =>
+          React.createElement('li', { key: setDef.id + '-li-' + idx }, label)
+        )
+      )
+    )
+  );
+});
+
   // ---------- App ----------
   function App(){
     const [tier,setTier]           = useState(BOX_TIERS[1]);
@@ -249,41 +289,7 @@ const PreviewGrid = React.memo(function PreviewGrid({ tierSlots, selected, catal
       setSelected([]);
     }
 
-    function SetCard({ set }) {
-      const first   = CATALOG.find(i => i.id === set.items[0]);
-      const thumbId = set.thumb || (first ? first.id : null);
-      const active  = selected.length === set.items.length &&
-                      set.items.every(id => selected.includes(id));
 
-      const shortItems = set.items.map(
-        id => SHORT_LABELS[id] || (CATALOG.find(i=>i.id===id)?.name ?? id)
-      );
-
-      return React.createElement('button', {
-        onClick: () => chooseSet(set),
-        className:
-          `group rounded-2xl border p-6 text-left transition bg-white w-full
-           ${active ? 'border-[var(--drh-navy)] ring-2 ring-[var(--drh-navy)]' : 'border-slate-200 hover:shadow-md'}`
-      },
-        React.createElement('div', { className:'grid grid-cols-[auto_1fr] gap-5 items-start' },
-          React.createElement('div', { className:'flex items-center gap-4 min-w-0' },
-            React.createElement('div', { className:'h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white ring-1 ring-slate-200 grid place-items-center overflow-hidden shrink-0' },
-              thumbId ? React.createElement(ProductImage, { id:thumbId, alt:set.label+' set' })
-                      : React.createElement('div',{className:'w-14 h-14 rounded-lg bg-slate-300'})
-            ),
-            React.createElement('div', { className:'min-w-0' },
-              React.createElement('div', { className:'text-lg md:text-xl font-semibold leading-tight' }, set.label),
-              React.createElement('div', { className:'text-xs text-slate-500' }, `${set.items.length} items`)
-            )
-          ),
-          React.createElement('ul', { className:'list-disc pl-5 text-[12px] leading-5 text-slate-700 space-y-0.5' },
-            shortItems.map((label, idx) =>
-              React.createElement('li', { key: set.id + '-li-' + idx }, label)
-            )
-          )
-        )
-      );
-    }
 
     const previewColsClass = tier.slots === 4 ? 'grid-cols-2' : 'grid-cols-3';
     const centerGrid       = tier.slots === 4 ? '' : 'place-content-center';
@@ -362,7 +368,16 @@ const PreviewGrid = React.memo(function PreviewGrid({ tierSlots, selected, catal
         React.createElement('div', { className:'lg:col-span-5' },
           React.createElement('h2', { className:'text-2xl md:text-3xl font-semibold text-[var(--drh-navy)] text-center mb-4' }, "Hank’s Pre-Built Sets"),
           React.createElement('div', { className:'max-w-5xl mx-auto grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4' },
-            RECOMMENDED_SETS.map(s => React.createElement(SetCard, { key:s.id, set:s }))
+RECOMMENDED_SETS.map(s =>
+  React.createElement(SetCard, {
+    key: s.id,
+    setDef: s,
+    selected,
+    catalog: CATALOG,
+    onChoose: chooseSet
+  })
+)
+
           ),
           React.createElement('div',{className:'max-w-5xl mx-auto mt-3 mb-6 text-center text-sm text-slate-700'},
             'Not seeing what you need? ',
@@ -437,8 +452,9 @@ const PreviewGrid = React.memo(function PreviewGrid({ tierSlots, selected, catal
                   React.createElement('div',{className:'aspect-[4/3] w-full rounded-xl bg-white grid place-items-center overflow-hidden'},
                     React.createElement(ProductImage,{ id:p.imageId, alt:p.name })
                   ),
-                  React.createElement('div',{className:'mt-2 font-medium'},p.name),
-                  React.createElement('div',{className:'text-xs text-slate-500 mt-0.5'},p.key),
+React.createElement('div',{className:'mt-2 font-medium'}, p.name),
+React.createElement('div',{className:'text-sm text-slate-600'}, `$${p.price.toFixed(2)}`),
+React.createElement('div',{className:'text-xs text-slate-500 mt-0.5'}, p.key),
                   active && React.createElement('div',{className:'mt-1 text-xs text-emerald-700 font-medium'},'Selected')
                 );
               })
