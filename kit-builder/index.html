@@ -509,13 +509,21 @@ React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border 
             React.createElement('div',{className:'mt-2 space-y-2 text-sm'},
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Box Tier'),React.createElement('span',{className:'font-medium'},tier.name)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Items Selected'),React.createElement('span',{className:'font-medium'},selected.length,' / ',tier.slots)),
-              (()=>{
-                const p = PACKAGING.find(x => x.key === selectedPack);
-                return React.createElement('div',{className:'flex items-center justify-between'},
-                  React.createElement('span',null,'Selected Packaging'),
-                  React.createElement('span',{className:'font-medium'}, p ? `${p.name} • ${p.key}` : 'None')
-                );
-              })(),
+(() => {
+  const p = PACKAGING.find(x => x.key === selectedPack);
+  return React.createElement(
+    React.Fragment,
+    null,
+    React.createElement('div', { className:'flex items-center justify-between' },
+      React.createElement('span', null, 'Selected Packaging'),
+      React.createElement('span', { className:'font-medium' }, p ? `${p.name} • ${p.key}` : 'None')
+    ),
+    React.createElement('div', { className:'flex items-center justify-between' },
+      React.createElement('span', null, 'Packaging Price / ea'),
+      React.createElement('span', { className:'font-medium' }, p ? `$${p.price.toFixed(2)}` : '—')
+    )
+  );
+})(),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Estimated Price / ea (items only)'),React.createElement('span',{className:'font-semibold'}, '$'+priceEach)),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Flat Kitting Rate'),React.createElement('span',{className:'font-medium'},'$5.00')),
               React.createElement('div',{className:'flex items-center justify-between'},React.createElement('span',null,'Order Qty'),React.createElement('span',{className:'font-medium'},qty))
