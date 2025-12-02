@@ -43,17 +43,31 @@
     return `(${a}) ${b}-${c}`;
   }
 
-  // ---------- Images ----------
-  function ProductImage({ id, alt, className }) {
-    const webp = `img/${id}.webp`;
-    const png  = `img/${id}.png`;
-    return React.createElement('img', {
-      alt, src: webp,
-      className: className || 'max-w-full max-h-full object-contain object-center select-none pointer-events-none',
-      draggable: false,
-      onError: (e) => { e.currentTarget.onerror = null; e.currentTarget.src = png; }
-    });
-  }
+
+// ---------- Images ----------
+const ProductImage = React.memo(function ProductImage({ id, alt, className }) {
+  const base = `img/${id}`;
+  return React.createElement(
+    React.Fragment,
+    null,
+    React.createElement(
+      'picture',
+      null,
+      React.createElement('source', { srcSet: `${base}.webp`, type: 'image/webp' }),
+      React.createElement('img', {
+        alt,
+        src: `${base}.png`,
+        className:
+          className ||
+          'max-w-full max-h-full object-contain object-center select-none pointer-events-none',
+        draggable: false,
+        decoding: 'async',
+        loading: 'lazy'
+      })
+    )
+  );
+});
+
 
   // ---------- Catalog (master, unchanged) ----------
   const CATALOG_BASE = [
@@ -421,20 +435,23 @@
             React.createElement('h2',{className:'text-lg font-semibold'},'4) Preview your full project'),
             React.createElement('div',{className:'mt-4 aspect-square rounded-2xl bg-slate-100 p-4'},
               React.createElement('div',{className:`h-full w-full rounded-xl border-2 border-dashed border-slate-300 grid ${previewColsClass} ${centerGrid} gap-3 p-3`},
-                Array.from({length:tier.slots}).map((_, idx) => {
-                  const id   = selected[idx];
-                  const item = CATALOG.find(i=>i.id===id);
-                  return React.createElement('div',{ key:idx, className:'rounded-xl border border-slate-200 bg-white p-2 grid grid-rows-[1fr_auto] justify-items-stretch' },
-                    id
-                      ? React.createElement(React.Fragment,null,
-                          React.createElement('div',{className:'w-full aspect-[4/3] rounded-md bg-white flex items-center justify-center overflow-hidden'},
-                            React.createElement(ProductImage,{ id:item.id, alt:item.name })
-                          ),
-                          React.createElement('div',{className:'mt-1 text-[11px] text-center text-slate-600 truncate', title:item.name}, item.name)
-                        )
-                      : React.createElement('div',{className:'h-full grid place-items-center text-xs text-slate-400'},'Empty Slot')
-                  );
-                })
+Array.from({ length: tier.slots }).map((_, idx) => {
+  const id   = selected[idx];
+  const item = CATALOG.find(i => i.id === id);
+  const nodeKey = id ? `slot-${idx}-${id}` : `slot-empty-${idx}`;
+
+  return React.createElement('div', { key: nodeKey, className:'rounded-xl border border-slate-200 bg-white p-2 grid grid-rows-[1fr_auto] justify-items-stretch' },
+    id
+      ? React.createElement(React.Fragment, null,
+          React.createElement('div', { className:'w-full aspect-[4/3] rounded-md bg-white flex items-center justify-center overflow-hidden' },
+            React.createElement(ProductImage, { id:item.id, alt:item.name })
+          ),
+          React.createElement('div', { className:'mt-1 text-[11px] text-center text-slate-600 truncate', title:item.name }, item.name)
+        )
+      : React.createElement('div', { className:'h-full grid place-items-center text-xs text-slate-400' }, 'Empty Slot')
+  );
+})
+
               ),
               React.createElement('div',{className:'mt-2 text-center text-xs text-slate-600'},'D.R. Horton Logo')
             )
