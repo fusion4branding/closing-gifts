@@ -406,7 +406,7 @@ const PreviewGrid = React.memo(function PreviewGrid({ tierSlots, selected, catal
                   type:'number', min:100, step:50, value:qty,
                   onChange:e=>{
                     const v = parseInt(e.target.value || 0, 10);
-                    const next = isNaN(v) ? 150 : Math.max(150, v - (v % 50));
+                    const next = isNaN(v) ? 100 : Math.max(100, v - (v % 50));
                     setQty(next);
                   },
                   className:'mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--drh-navy)]'
@@ -484,7 +484,7 @@ const PreviewGrid = React.memo(function PreviewGrid({ tierSlots, selected, catal
 React.createElement('div',{className:'bg-white rounded-2xl shadow-sm p-5 border border-slate-200'},
   React.createElement('h2',{className:'text-lg font-semibold'},'4) Preview your full project'),
   React.createElement(PreviewGrid, { tierSlots: tier.slots, selected, catalog: CATALOG })
-)
+),
 
 
           // 5) Summary
