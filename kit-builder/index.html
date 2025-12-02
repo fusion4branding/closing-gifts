@@ -58,74 +58,19 @@
   // ---------- Catalog (master, unchanged) ----------
   const CATALOG_BASE = [
 
-    { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:8.95,  moq:20  },
+    { id:"gift_box_magnetic_15x12",     name:'15" × 12" Magnetic Gift Box (sold empty)',            base:13.00,  moq:100  },
 
-    { id:"vacuum_dynamo_portable",      name:'Dynamo Rechargeable Portable Vacuum',                 base:10.70, moq:40  },
-    { id:"trunk_organizer_expandable",  name:'Expandable Trunk Organizer',                          base:11.45, moq:50  },
-    { id:"box_corrugated_large_black",  name:'Black Corrugated Large Box',                          base:11.81, moq:100 },
+    { id:"display_mailer_box_9_5x7_75x4",      name:'Display Mailer Box 9.5" × 7.75" × 4"',         base:4.00,  moq:100  },
 
-    { id:"cooler_lunch_ultimate",       name:'Ultimate Lunch Bag Cooler',                           base:12.49, moq:100 },
+    { id:"box_corrugated_large_black",  name:'Black Corrugated Large Box',                          base:5.99, moq:100 },
 
-    { id:"car_wash_pit_crew",           name:'Pit Crew 9-Piece Car Wash Detailing Kit',             base:16.67, moq:25  },
-    { id:"usb_diffuser_magnet_case",    name:'USB Diffuser (clear case, magnet closure)',           base:17.02, moq:25  },
-    { id:"tool_kit_26pc",               name:'26-Piece Deluxe Tool Kit',                            base:17.64, moq:40  },
-    { id:"utensil_set_bamboo_silicone", name:'5-Piece Bamboo & Silicone Utensil Set',               base:18.95, moq:50  },
-    { id:"finch_jar_wood_lid",          name:'Finch Jar with Wooden Lid',                           base:19.95, moq:72  },
-    { id:"cooler_backpack_mod",         name:'Mod Insulated Cooler Backpack',                       base:20.29, moq:50  },
-    { id:"candle_wixie_5oz",            name:'Wixie 5 oz Candle (with gift box)',                   base:20.63, moq:50  },
-    { id:"tool_set_alton_22pc",         name:'Alton 22-Piece Tool Set',                             base:20.99, moq:25  },
-    { id:"knife_peeler_ceramic_set",    name:'Top Choice Ceramic Knife & Peeler Set',               base:21.10, moq:20  },
-    { id:"wine_tools_bamboo_4pc",       name:'4-Piece Bamboo Wine Tool Set',                        base:21.49, moq:50  },
-    { id:"tumbler_pinnacle_40oz",       name:'Pinnacle 40 oz Vacuum Insulated Tumbler w/ Straw',    base:21.53, moq:24  },
-    { id:"chefs_companion_kit",         name:"Chef's Companion Kit",                                base:21.69, moq:50  },
-
-    { id:"easy_kitchen_apple_master",   name:'Easy Kitchen Gift Set – The Apple Master',            base:21.99, moq:25  },
-    { id:"hypergear_multi_plug_5",      name:'HyperGear Multi Plug 5 (USB-C + USB)',                base:22.99, moq:24  },
-    { id:"indoor_pillow_16",            name:'Indoor Pillow 16"×16"',                               base:23.47, moq:48  },
-    { id:"plush_blanket_50x60",         name:'Micro Fleece Plush Blanket 50"×60"',                  base:24.38, moq:25  },
-    { id:"cube_power_strip",            name:'HyperGear CUBE Multi-Port Power Strip (cord)',        base:26.99, moq:24  },
-    { id:"rabbit_garnish_tool",         name:'rabbit® Cocktail Garnish Tool',                       base:27.50, moq:48  },
-    { id:"bbq_grilling_mitt_kit",       name:'BBQ Grilling Mitt Kit (with tools)',                  base:28.33, moq:25  },
-    { id:"lex_bamboo_speaker_charger",  name:'Lex Bamboo Speaker + 5W Phone Charger',               base:29.25, moq:50  },
-    { id:"ilive_magnetic_speaker",      name:'iLive™ Water-Resistant Magnetic Speaker',             base:32.40, moq:20  },
-    { id:"satechi_findall_keychain",    name:'SATECHI® FindAll™ Keychain (Apple Find My)',          base:33.75, moq:1   },
-    { id:"friz_cooler_bag",             name:'Heavy-Duty Friz Cooler Bag',                          base:36.30, moq:48  },
-    { id:"crossroad_emergency_kit",     name:'Crossroad Emergency Road Kit',                        base:36.72, moq:10  },
-    { id:"growler_64oz_beast",          name:'64 oz “The Beast” Stainless Growler',                 base:36.85, moq:24  },
-    { id:"desk_lamp_linear_black",      name:'Modern Office Desk Lamp (Linear)',                    base:36.98, moq:12  },
-    { id:"urban_peak_cooler_12can",     name:'Urban Peak Waterproof 12-Can Hinge Cooler',           base:37.59, moq:12  },
-    { id:"sound_shine_lamp_bt",         name:'Sound Shine Desk Lamp + Bluetooth Speaker + Qi',      base:37.78, moq:15  },
-    { id:"myrnam_cooler_backpack",      name:'Myrnam Cooler Backpack',                              base:37.95, moq:35  },
-    { id:"riverbend_cooler_chair",      name:'Riverbend Foldable Cooler Backpack & Chair',          base:38.99, moq:12  },
-
-    { id:"power_pulse_handheld_vac",    name:'Power Pulse Rechargeable Handheld Vacuum',            base:36.29, moq:25  },
-    { id:"chess_board_wine_set",        name:'Chess Board & Wine Tool Set',                         base:20.00, moq:36  }
+    { id:"urban_peak_mombo_backpack_cooler",     name:'Urban Peak Waterproof Mombo Backpack/Cooler',   base:55, moq:100  }
   ];
 
   const CATALOG_ADDITIONS = [
-    { id:"tea_towel_rpet",              name:"Sublimated RPET Tea Towel",                           base:5.15,  moq:100 },
-    { id:"pizza_cutter_mammamia",       name:"Mamma Mia Pizza Cutter",                              base:4.56,  moq:100 },
-    { id:"coaster_marble_octagon",      name:"Marble Octagon Coaster",                              base:6.83,  moq:50  },
-    { id:"potholder_heavy",             name:"Heavy-Duty Potholder",                                base:6.22,  moq:100 },
-    { id:"silicone_ice_cube_maker",     name:"Silicone Ice Cube Maker & Bucket",                    base:8.83,  moq:75  },
+    { id:"yacht_club_boat_tote",        name:"Yacht Club Boat Tote — 20.5\" × 13\" × 6.7\"",        base:17.00, moq:100  },
 
-    { id:"workit_gloves",               name:"Workit All Purpose Gloves",                           base:8.35,  moq:50  },
-
-    { id:"foam_handle_ice_scraper",     name:"Foam Handle Ice Scraper",                             base:3.70,  moq:100 },
-    { id:"cargo_org_with_cooler",       name:"Cargo Organizer with Cooler",                         base:16.69, moq:40  },
-    { id:"snowbrush_super_deluxe",      name:"Super Deluxe Snowbrush Ice Scraper",                  base:8.27,  moq:50  },
-    { id:"car_caddy",                   name:"Car Caddy",                                           base:3.77,  moq:100 },
-
-    { id:"oceanside_keychain_blue",     name:"Oceanside Leather Key Chain — Blue",                  base:5.13,  moq:250 },
-    { id:"yacht_club_boat_tote",        name:"Yacht Club Boat Tote — 20.5\" × 13\" × 6.7\"",        base:13.98, moq:25  },
-
-    { id:"coaster_slate_square",        name:"Square Slate Coaster",                                base:5.18, moq:50  },
-    { id:"marshalls_tool_set",          name:"Marshalls Tool Set (18-pc)",                          base:16.37, moq:25  },
-    { id:"nbn_whitby_24can_cooler",     name:"NBN Whitby 24-Can Backpack Cooler",                   base:37.15, moq:24  },
-    { id:"headlamp_starlight",          name:"Best Buddy Tools® Starlight Rechargeable LED Headlamp",base:11.31, moq:30 },
-    { id:"flux_wall_charger_holder",    name:"Flux Wall Charger & Phone Holder (Type-C, USB & AC)", base:14.90, moq:30  },
-    { id:"stark_2_bluetooth_speaker",   name:"Stark 2.0 Bluetooth® Speaker",                        base:21.40, moq:50  },
- 
+    { id:"nbn_whitby_24can_cooler",     name:"NBN Whitby 24-Can Backpack Cooler",                   base:30, moq:100  },
   
     { id:"deluxe_household_tool_set",   name:'Deluxe Household Tool Set (case)',                    base:49.99, moq:100 },
 
