@@ -140,13 +140,13 @@ const ProductImage = React.memo(function ProductImage({ id, alt, className }) {
     { id:'better', label:'Better', thumb:'reco_better',
       items:['deluxe_household_tool_set'] },
     { id:'best',   label:'Best',   thumb:'reco_best',
-      items:['nbn_whitby_24can_cooler','mini_maglite_2aa','camp_mug_14oz','rechargeable_milk_frother_wka_mf25','teak_spoon_holder'] },
+      items:['mini_maglite_2aa','camp_mug_14oz','rechargeable_milk_frother_wka_mf25','teak_spoon_holder'] },
   ];
 
   const SHORT_LABELS = {
     tumbler_oasis_20oz:"20 oz Tumbler", cutting_board_two_tone:"Cutting Board",
     deluxe_household_tool_set:"Household Tool Set",
-    nbn_whitby_24can_cooler:"24-Can Cooler", mini_maglite_2aa:"Flashlight", camp_mug_14oz:"14 oz Mug", rechargeable_milk_frother_wka_mf25:"Milk Frother", teak_spoon_holder:"Teak Spoon Holder",
+    mini_maglite_2aa:"Flashlight", camp_mug_14oz:"14 oz Mug", rechargeable_milk_frother_wka_mf25:"Milk Frother", teak_spoon_holder:"Teak Spoon Holder",
   };
 
   const BOX_TIERS = [
@@ -304,24 +304,38 @@ const SetCard = React.memo(function SetCard({ setDef, selected, catalog, onChoos
 
       setSending(true);
 
-      const packObj = PACKAGING.find(p=>p.key===selectedPack);
+const packObj = PACKAGING.find(p => p.key === selectedPack);
 
-      const payload = {
-        admin: ADMIN_EMAIL,
-        site: SITE_NAME,
-        submittedAt: new Date().toISOString(),
-        name,
-        division,
-        email: email.trim(),
-        phone: phone ? formatPhone(phone) : '',
-        tier: { id:tier.id, name:tier.name, slots:tier.slots, pack:tier.pack },
-        qty, priceEach,
-        packaging: packObj ? { sku: packObj.key, id: packObj.imageId, name: packObj.name } : null,
-        items: selected.map(id => {
-          const i = CATALOG.find(x=>x.id===id)||{};
-          return { id, name:i.name || id, unitPrice:i.base };
-        }),
-      };
+// Flatten for email/template rendering
+const packagingLabel   = packObj ? `${packObj.name} • ${packObj.key}` : 'None';
+const packagingSku     = packObj ? packObj.key   : '';
+const packagingName    = packObj ? packObj.name  : '';
+const packagingPrice   = packObj ? Number(packObj.price) : 0;
+
+const payload = {
+  admin: ADMIN_EMAIL,
+  site: SITE_NAME,
+  submittedAt: new Date().toISOString(),
+  name,
+  division,
+  email: email.trim(),
+  phone: phone ? formatPhone(phone) : '',
+  tier: { id: tier.id, name: tier.name, slots: tier.slots, pack: tier.pack },
+  qty,
+  priceEach, // items-only estimate
+
+  // Send a string for the email + separate fields you can use in the sheet/template
+  packaging: packagingLabel,          // fixes [object Object] in email
+  packagingSku,
+  packagingName,
+  packagingPrice,
+
+  items: selected.map(id => {
+    const i = CATALOG.find(x => x.id === id) || {};
+    return { id, name: i.name || id, unitPrice: i.base };
+  }),
+};
+
 
       try{
         const res = await fetch(ENDPOINT_URL, {
